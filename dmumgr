@@ -101,7 +101,7 @@ class Runner(object):
     def run(self):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
             for cgr in self.cfg.params.cgrs:
-                job = AD(self.cfg.schedules[self.cfg.params.schedule])
+                job = AD(self.cfg.schedules[self.cfg.params.override])
                 job.update(self.cfg.datamarts[cgr])
                 job.cgr = cgr
                 job.job_id = job.job_id(job)
@@ -262,7 +262,7 @@ class Datamart(object):
                 'cgrs': [],
                 'daemon': True,
                 'debug': options.debug,
-                'override': options.schedule,
+                'override': options.override,
                 'portal_path': options.portal_path,
                 'workers': int(options.workers)
             },
