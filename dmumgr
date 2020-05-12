@@ -281,7 +281,7 @@ class Datamart(object):
                             CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0'),
                             CronTrigger(day_of_week='sun', hour='6-23', minute='0'),
                         ]),
-                        'cmd_string': lambda p: f"timeout -k 29.5m -s 9 --preserve-status 29.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_hourly_top_off.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 29.5m -s 9 --preserve-status 29.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_hourly_top_off.log 2>&1\""
                     },
                     'daily_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_daily_regenerate',
@@ -289,7 +289,7 @@ class Datamart(object):
                         'misfire_grace_time': 90*60,
                         'period': 'daily',
                         'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1\""
                     },
                     'weekly_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
@@ -297,7 +297,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1\""
                     }
                 },
                 'hhourly': {
@@ -310,7 +310,7 @@ class Datamart(object):
                             CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0,30'),
                             CronTrigger(day_of_week='sun', hour='6-23', minute='0,30')
                         ]),
-                        'cmd_string': lambda p: f"timeout -k 15.5m -s 9 --preserve-status 15.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_half_hourly_top_off.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 15.5m -s 9 --preserve-status 15.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_half_hourly_top_off.log 2>&1\""
                     },
                     'daily_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_daily_regenerate',
@@ -318,7 +318,7 @@ class Datamart(object):
                         'misfire_grace_time': 60*60,
                         'period': 'daily',
                         'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1\""
                     },
                     'weekly_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
@@ -326,7 +326,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1\""
                     }
                 },
                 'qhourly': {
@@ -339,7 +339,7 @@ class Datamart(object):
                             CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0,15,30,45'),
                             CronTrigger(day_of_week='sun', hour='6-23', minute='0,15,30,45'),
                         ]),
-                        'cmd_string': lambda p: f"timeout -k 10.5m -s 9 --preserve-status 10m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_quarter_hourly_top_off.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 10.5m -s 9 --preserve-status 10m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_quarter_hourly_top_off.log 2>&1\""
                     },
                     'daily_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_daily_regenerate',
@@ -347,7 +347,7 @@ class Datamart(object):
                         'misfire_grace_time': 60*60,
                         'period': 'daily',
                         'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1\""
                     },
                     'weekly_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
@@ -355,7 +355,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
-                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m \"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1\""
                     }
                 }
             },
