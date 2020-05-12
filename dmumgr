@@ -102,7 +102,7 @@ class Runner(object):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
             for cgr in self.cfg.params.cgrs:
                 if shcmd(f'pgrep -f dmumgr | grep {cgr}')[2] != 0:
-                    cmd = f"timeout -k {self.cfg.params.timeout} -s 9  --preserve-status node ./dmumgr.js -c {cgr} -m {self.cfg.params.mode} -b {self.cfg.params.schedule} "
+                    cmd = f"timeout -k {self.cfg.params.timeout} -s 9  --preserve-status 240m node ./dmumgr.js -c {cgr} -m {self.cfg.params.mode} -b {self.cfg.params.schedule} "
                     cmd += f">> /var/log/atollogy/dmumgr/{self.cfg.params.mode}_custom_{self.cfg.params.schedule}.log 2>&1"
                     self.tasks.append(self.pool.submit(shcmd, [cmd]))
             print(wait(self.tasks))
@@ -137,7 +137,7 @@ def dmtask(dm_info, job):
     params = AD(dm_info)
     params.job = job
     print(f'Running job with cfg: {params}')
-    mode_cfg = dm_info.mode[mode]
+    mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
         qname, tables, qtype = qinfo
         for table in tables:
