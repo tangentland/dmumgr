@@ -111,7 +111,7 @@ class Runner(object):
                 if shcmd(f'pgrep -f dmumgr | grep {cgr}')[2] != 0:
                     self.tasks.append(self.pool.submit(dmtask, [self.cfg.datamart, job]))
                 print(self.tasks)
-            print(wait(self.tasks))
+            wait(self.tasks)
 
 def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
@@ -479,12 +479,8 @@ class Datamart(object):
                 self.scheduler.shutdown()
         else:
             wqueue = _mp.Queue()
-            runner = _mp.Process(
-                        target=Runner(self.cfg).run,
-                        args=(),
-                        name='runner',
-                        daemon=False)
-            runner.start()
+            runner = Runner(self.cfg)
+            runner.run()
 
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
