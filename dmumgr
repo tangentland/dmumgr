@@ -120,18 +120,18 @@ def dmtask(dm_info, job):
     def run_projection(params, projection):
         projections = AD({
             'beacons': {
-                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/etl-beacons.js'
+                'module': f'./lib/datamart/incremental-dataloader/etl-beacons.js'
             },
             'cycles': {
-                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/etl-cycles.js'
+                'module': f'./lib/datamart/incremental-dataloader/etl-cycles.js'
             },
             'subjects': {
-                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/index.js'
+                'module': f'./{params.portal_path}/lib/datamart/incremental-dataloader/index.js'
             }
         })
         params.job.cmd = f"node --max-old-space-size=4096 {projections[projection].module} --env='prd' --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         if shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}')[2] != 0:
-            os.system(params.job.cmd_string(params.job))
+            os.system(f"cd {params.portal_path}; {params.job.cmd_string(params.job)}")
 
     params = AD(dm_info)
     params.job = job
