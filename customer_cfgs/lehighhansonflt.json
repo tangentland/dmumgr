@@ -3,5 +3,6 @@
     "use_case": "yom",
     "database": "multiply_dime",
     "top_off": "hourly",
-    "executor": "default"
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
 }

@@ -3,5 +3,6 @@
     "use_case": "yom",
     "database": "commence_gown",
     "top_off": "hourly",
-    "executor": "default"
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
 }

@@ -3,5 +3,6 @@
     "use_case": "mom",
     "database": "unity_thoughtful",
     "top_off": "hourly",
-    "executor": "default"
+    "executor": "default",
+    "projections": ["subjects"]
 }

@@ -3,5 +3,6 @@
     "use_case": "yom",
     "database": "energetic_sloth",
     "top_off": "hourly",
-    "executor": "default"
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
 }

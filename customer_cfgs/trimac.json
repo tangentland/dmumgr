@@ -3,5 +3,6 @@
     "use_case": "yom",
     "database": "carriage_activate",
     "top_off": "qhourly",
-    "executor": "default"
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
 }
