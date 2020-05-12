@@ -465,7 +465,7 @@ class Datamart(object):
             print(self.scheduler.print_jobs())
 
     def event_listener(self, event):
-        print(f'{datetime.utcnow() -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
+        print(f'{datetime.utcnow()} -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
 
     def run(self):
         if self.cfg.params.daemon:
