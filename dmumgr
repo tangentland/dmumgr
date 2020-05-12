@@ -126,7 +126,7 @@ def dmtask(dm_info, job):
                 'module': f'./lib/datamart/incremental-dataloader/etl-cycles.js'
             },
             'subjects': {
-                'module': f'./{params.portal_path}/lib/datamart/incremental-dataloader/index.js'
+                'module': f'./lib/datamart/incremental-dataloader/index.js'
             }
         })
         params.job.cmd = f"node --max-old-space-size=4096 {projections[projection].module} --env='prd' --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
