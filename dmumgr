@@ -88,14 +88,10 @@ class GracefulInterruptHandler(object):
         self.released = True
         return True
 
-class Worker_Pool(ThreadPoolExecutor):
-    def __init__(self, max_workers=4):
-        ThreadPoolExecutor.__init__(self, max_workers=max_workers)
-
 class Runner(object):
     def __init__(self, cfg):
+        self.pool = ThreadPoolExecutor(max_workers=max_workers)
         self.tasks = []
-        self.pool = Worker_Pool(max_workers=cfg.params.workers)
         self.cfg = cfg
 
     def run(self):
@@ -107,11 +103,8 @@ class Runner(object):
                 job.job_id = job.job_id(job)
                 job.end_time = datetime.utcnow()
                 job.start_time = job.end_time - self.cfg.periods[job.period]
-                print(job)
-                if shcmd(f'pgrep -f dmumgr | grep {cgr}')[2] != 0:
-                    self.tasks.append(self.pool.submit(dmtask, [self.cfg.datamart, job]))
-                print(self.tasks)
-            wait(self.tasks)
+                self.tasks.append((self.cfg.datamart, job))
+            results = self.pool.map(dmtask, self.tasks)
 
 def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
