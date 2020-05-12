@@ -101,7 +101,7 @@ class Runner(object):
     def run(self):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
             for cgr in self.cfg.params.cgrs:
-                job = AD(self.cfg.schedules[self.cfg.params.override])
+                job = AD(self.cfg.schedules.override[self.cfg.params.override])
                 job.update(self.cfg.datamarts[cgr])
                 job.cgr = cgr
                 job.job_id = job.job_id(job)
@@ -110,6 +110,7 @@ class Runner(object):
                 print(job)
                 if shcmd(f'pgrep -f dmumgr | grep {cgr}')[2] != 0:
                     self.tasks.append(self.pool.submit(dmtask, [self.cfg.datamart, job]))
+                print(self.tasks)
             print(wait(self.tasks))
 
 def dmtask(dm_info, job):
