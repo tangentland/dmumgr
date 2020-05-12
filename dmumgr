@@ -131,7 +131,7 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = "NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 "
         params.job.cmd += f"{projections[projection].module} --datamart-instance={params.job.cgr} --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
-        if shcmd(f'ps ax | grep node | grep [{job_id[0]}]{job_id[1:]}')[2] != 0:
+        if shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}')[2] != 0:
             os.system(params.job.cmd_string(params.job))
 
     params = AD(dm_info)
