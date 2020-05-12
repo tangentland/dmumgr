@@ -1,0 +1,7 @@
+{
+    "datamart_type": "pg",
+    "use_case": "yom",
+    "database": "motion_clipper",
+    "top_off": "hourly",
+    "executor": "long_running"
+}

@@ -1,0 +1,499 @@
+#!/usr/bin/env python3.6
+
+from attribute_dict import *
+from shell import shcmd
+
+import argparse
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.triggers.combining import AndTrigger, OrTrigger
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
+import apscheduler.events as ape
+from concurrent.futures import ThreadPoolExecutor, wait
+from datetime import date, datetime, timedelta, timezone
+from functools import partial
+import json
+import logging
+
+logger = logging.getLogger("dmumgr")
+
+import multiprocessing as _mp
+from multiprocessing import current_process, Pool, Queue
+from operator import itemgetter, attrgetter
+import os
+from os import devnull, kill
+from pprint import pprint as pp
+from pytz import timezone
+import signal
+import subprocess as _sp
+import sys
+from threading import Thread
+import sched
+import time
+
+
+def shcmd(cmd, si=None, shell=True):
+    """Execute command using subprocess and returns a tuple (cmd output, cmd stderr, result code)"""
+
+    rawcmd = []
+    if not isinstance(cmd, list):
+        cmd = [cmd]
+
+    for c in cmd:
+        rawcmd.append("%s" % (c))
+
+    cmdobj = _sp.Popen(rawcmd, stdin=si, stdout=_sp.PIPE, stderr=_sp.PIPE, shell=shell)
+
+    try:
+        (cmdout, cmderr) = cmdobj.communicate()
+        cmdout = cmdout.decode().split("\r\n")
+        res = (cmdout, cmderr, cmdobj.returncode)
+        return res
+    except OSError as e:
+        return (None, e, cmdobj.returncode)
+
+class GracefulInterruptHandler(object):
+    def __init__(self, signals=(signal.SIGINT, signal.SIGTERM), funcs=[]):
+        self.signals = signals
+        self.original_handlers = {}
+        self.funcs = funcs
+
+    def __enter__(self):
+        self.interrupted = False
+        self.released = False
+
+        for sig in self.signals:
+            self.original_handlers[sig] = signal.getsignal(sig)
+            signal.signal(sig, self.handler)
+
+        return self
+
+    def handler(self, signum, frame):
+        [f() for f in self.funcs]
+        self.release()
+        self.interrupted = True
+
+    def __exit__(self, type, value, tb):
+        self.release()
+
+    def release(self):
+        if self.released:
+            return False
+
+        for sig in self.signals:
+            signal.signal(sig, self.original_handlers[sig])
+
+        self.released = True
+        return True
+
+class Worker_Pool(ThreadPoolExecutor):
+    def __init__(self, max_workers=4):
+        ThreadPoolExecutor.__init__(self, max_workers=max_workers)
+
+class Runner(object):
+    def __init__(self, cfg):
+        self.tasks = []
+        self.pool = Worker_Pool(max_workers=cfg.params.workers)
+        self.cfg = cfg
+
+    def run(self):
+        with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
+            for cgr in self.cfg.params.cgrs:
+                if shcmd(f'pgrep -f dmumgr | grep {cgr}')[2] != 0:
+                    cmd = f"timeout -k {self.cfg.params.timeout} -s 9  --preserve-status node ./dmumgr.js -c {cgr} -m {self.cfg.params.mode} -b {self.cfg.params.schedule} "
+                    cmd += f">> /var/log/atollogy/dmumgr/{self.cfg.params.mode}_custom_{self.cfg.params.schedule}.log 2>&1"
+                    self.tasks.append(self.pool.submit(shcmd, [cmd]))
+            print(wait(self.tasks))
+
+def dmtask(dm_info, job):
+    def run_query(params, qtype, table, qname):
+        query = params.tables[table].sql[qname](params.job)
+        query_bases = AD({
+            'system': f"PGPASSWORD='{params.conn_info.password}' psql --host=${params.conn_info.host} --port=5432 --username=${params.conn_info.user} --dbname={params.conn_info.database} -c '{query}'",
+            'datamart':  f"PGPASSWORD='{params.conn_info.password}' psql --host=${params.conn_info.host} --port=5432 --username=${params.conn_info.user} --dbname={params.job.database} -c '{query}'"
+        })
+        params.job.cmd = query_bases[qtype]
+        os.system(params.job.cmd_string(params.job))
+
+    def run_projection(params, projection):
+        projections = AD({
+            'beacons': {
+                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/etl-beacons.js'
+            },
+            'cycles': {
+                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/etl-cycles.js'
+            },
+            'subjects': {
+                'module': f'{params.portal_path}/lib/datamart/incremental-dataloader/index.js'
+            }
+        })
+        params.job.cmd = "NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 "
+        params.job.cmd += f"{projections[projection].module} --datamart-instance={params.job.cgr} --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        if shcmd(f'ps ax | grep node | grep [{job_id[0]}]{job_id[1:]}')[2] != 0:
+            os.system(params.job.cmd_string(params.job))
+
+    params = AD(dm_info)
+    params.job = job
+    print(f'Running job with cfg: {params}')
+    mode_cfg = dm_info.mode[mode]
+    for qinfo in mode_cfg.query_map[job.use_case]:
+        qname, tables, qtype = qinfo
+        for table in tables:
+            run_query(params, qtype, table, qname)
+    for projection in mode_cfg.projections[job.use_case]:
+        run_projection(params, projection)
+
+class Datamart(object):
+    def __init__(self, options):
+        self.scheduler = BackgroundScheduler(
+            {
+                'apscheduler.jobstores.default': {
+                    'type': 'sqlalchemy',
+                    'url': 'sqlite:///jobs.sqlite'
+                },
+                'apscheduler.executors.default': {
+                    'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+                    'max_workers': int(options.workers)
+                },
+                'apscheduler.executors.long_running': {
+                    'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+                    'max_workers': int(int(options.workers)/2)
+                },
+                'apscheduler.daemon': 'true',
+                'apscheduler.job_defaults.coalesce': 'true',
+                'apscheduler.job_defaults.max_instances': '1',
+                'apscheduler.timezone': timezone('US/Eastern')
+            }
+        )
+        self.jobs = AD()
+        self.event_codes = AD()
+        self.event_codes.by_id = AD({ape.__dict__[evt]: evt for evt in ape.__dict__.keys() if evt[:5] == 'EVENT'})
+        self.event_codes.by_event = AD({evt: ape.__dict__[evt] for evt in ape.__dict__.keys() if evt[:5] == 'EVENT'})
+        self.scheduler.add_listener(self.event_listener, ape.EVENT_ALL)
+
+        self.cfg = AD({
+            'datamarts': {},
+            'job_defs': {},
+            'modes': {
+                'hourly': [],
+                'hhourly': [],
+                'qhourly': []
+            },
+            'datamart': {
+                'portal_path': options.portal_path,
+                'conn_info': {
+                    'user': 'atollogy',
+                    'host': 'analytics.ccbxi26o2tim.us-west-2.rds.amazonaws.com',
+                    'password': 'BobCrapKnowsNothing470',
+                    'port': 5432,
+                    'database': 'datamart'
+                },
+                'mode': {
+                    'regenerate': {
+                        'projections': {
+                            'mom': ['subjects', 'beacons'],
+                            'yom':['subjects', 'cycles']
+                        },
+                        'query_map': {
+                            'mom': [
+                                ['delete_sync_markers', ['datamart_sync'], 'system'],
+                                ['delete_events', ['f_events'], 'datamart'],
+                                ['delete_intervals', ['f_intervals'], 'datamart']
+                            ],
+                            'yom':[
+                                ['delete_sync_markers', ['datamart_sync'], 'system'],
+                                ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
+                                ['delete_cycles', ['f_cycles_summarized'], 'datamart']
+                            ]
+                        }
+                    },
+                    'top_off': {
+                        'projections': {
+                            'mom': ['subjects', 'beacons'],
+                            'yom':['subjects', 'cycles']
+                        },
+                        'query_map': {
+                            'mom': [],
+                            'yom':[]
+                        }
+                    }
+                },
+                'tables': {
+                    'datamart_sync': {
+                      'ttype': 'system',
+                      'sql': {
+                        'delete_sync_markers': lambda p: f"DELETE FROM datamart_sync WHERE customer = '{p.cgr}' AND sync_event_time BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    },
+                    'f_beacon_intervals': {
+                      'ttype': 'datamart',
+                      'sql': {
+                        'delete_intervals': lambda p: f"DELETE FROM f_beacon_intervals WHERE f_collection_time BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    },
+                    'f_cycles_detailed': {
+                      'ttype': 'datamart',
+                      'sql': {
+                        'delete_cycle_steps': lambda p: f"DELETE FROM f_cycles_detailed WHERE start_time BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    },
+                    'f_cycles_summarized': {
+                      'ttype': 'datamart',
+                      'sql': {
+                        'delete_cycles': lambda p: f"DELETE FROM f_cycles_summarized WHERE start_time BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    },
+                    'f_events': {
+                      'ttype': 'datamart',
+                      'sql': {
+                        'delete_events': lambda p: f"DELETE FROM f_events WHERE f_collection_time  BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    },
+                    'f_intervals': {
+                      'ttype': 'datamart',
+                      'sql': {
+                        'delete_intervals': lambda p: f"DELETE FROM f_intervals WHERE measure_start_time  BETWEEN '{p.start_time}' AND '{p.end_time}';"
+                      }
+                    }
+                },
+            },
+            'params': {
+                'cgrs': [],
+                'daemon': True,
+                'debug': options.debug,
+                'mode': options.mode,
+                'cfg_path': options.path,
+                'portal_path': options.portal_path,
+                'schedule': options.schedule,
+                'timeout': options.timeout,
+                'workers': int(options.workers)
+            },
+            'schedules': {
+                'hourly': {
+                    'top_off': {
+                        'job_id': lambda p: f'{p.cgr}_top_off_hourly',
+                        'mode': 'top_off',
+                        'misfire_grace_time': 60*30,
+                        'period': 'hourly',
+                        'trigger': OrTrigger([
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0'),
+                            CronTrigger(day_of_week='sun', hour='6-23', minute='0'),
+                        ]),
+                        'cmd_string': lambda p: f"timeout -k 29.5m -s 9 --preserve-status 29.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_hourly_top_off.log 2>&1"
+                    },
+                    'daily_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_daily_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 90*60,
+                        'period': 'daily',
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                    },
+                    'weekly_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 3*60*60,
+                        'period': 'weekly',
+                        'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                    }
+                },
+                'hhourly': {
+                    'top_off': {
+                        'job_id': lambda p: f'{p.cgr}_top_off_half_hourly',
+                        'mode': 'top_off',
+                        'misfire_grace_time': 60*15,
+                        'period': 'hhourly',
+                        'trigger': OrTrigger([
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0,30'),
+                            CronTrigger(day_of_week='sun', hour='6-23', minute='0,30')
+                        ]),
+                        'cmd_string': lambda p: f"timeout -k 15.5m -s 9 --preserve-status 15.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_half_hourly_top_off.log 2>&1"
+                    },
+                    'daily_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_daily_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 60*60,
+                        'period': 'daily',
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                    },
+                    'weekly_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 3*60*60,
+                        'period': 'weekly',
+                        'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                    }
+                },
+                'qhourly': {
+                    'top_off': {
+                        'job_id': lambda p: f'{p.cgr}_top_off_quarter_hourly',
+                        'mode': 'top_off',
+                        'misfire_grace_time': 60*8,
+                        'period': 'qhourly',
+                        'trigger': OrTrigger([
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='4-23', minute='0,15,30,45'),
+                            CronTrigger(day_of_week='sun', hour='6-23', minute='0,15,30,45'),
+                        ]),
+                        'cmd_string': lambda p: f"timeout -k 10.5m -s 9 --preserve-status 10m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_quarter_hourly_top_off.log 2>&1"
+                    },
+                    'daily_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_daily_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 60*60,
+                        'period': 'daily',
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 59.5m -s 9 --preserve-status 59.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                    },
+                    'weekly_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 3*60*60,
+                        'period': 'weekly',
+                        'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"timeout -k 179.5m -s 9 --preserve-status 179.0m {p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                    }
+                }
+            },
+            'periods': {
+                "hourly": timedelta(hours=1),
+                "hhourly": timedelta(minutes=30),
+                "qhourly": timedelta(minutes=15),
+                "daily": timedelta(days=1),
+                "weekly": timedelta(weeks=2)
+            }
+        })
+
+        # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
+            # add_job (
+            #     func,
+            #     trigger: NoneType=None,
+            #     args: <list[tuple]>,
+            #     kwargs: NoneType=None,
+            #     id: <str>,
+            #     name: <str>,
+            #     misfire_grace_time: <seconds>,
+            #     coalesce: <bool=False>,
+            #     max_instances: <int>,
+            #     next_run_time: <iso8601 string>,
+            #     jobstore: str=builtins.str,
+            #     executor: str=builtins.str,
+            #     replace_existing: bool=False,
+            #     **trigger_args
+            #     )
+
+        for fn in sorted([f for f in shcmd(f'find {self.cfg.params.cfg_path} -name "*.json"|grep -v archive')[0][0].split('\n') if len(f)]):
+            if os.path.exists(fn):
+                cgr = fn.split('/')[-1].split('.')[0]
+                self.cfg.job_defs[cgr] = AD()
+                self.jobs[cgr] = AD()
+                print(f"Loading {cgr}: {fn}")
+                ccfg = self.cfg.datamarts[cgr] = AD.load(fn)
+                self.cfg.params.cgrs.append(cgr)
+                self.cfg.modes[ccfg.top_off].append(cgr)
+                for job_type, job_tmpl in self.cfg.schedules[ccfg.top_off].items():
+                    job = AD(job_tmpl)
+                    job.update(ccfg)
+                    job.cgr = cgr
+                    job.job_id = job.job_id(job)
+                    job.end_time = datetime.utcnow()
+                    job.start_time = job.end_time - self.cfg.periods[job.period]
+                    self.cfg.job_defs[cgr][job_type] = job
+                    if self.cfg.params.debug:
+                        self.jobs[cgr][job.job_id] = self.scheduler.add_job(
+                            os.system,
+                            job.trigger,
+                            args=[f'echo {job.job_id}:$(date)  >> /var/log/atollogy/dmumgr/{job.cgr}_debug.log'],
+                            executor='default',
+                            id=job.job_id,
+                            name=job.job_id,
+                            misfire_grace_time=60,
+                            coalesce=True,
+                            max_instances=1,
+                            replace_existing=True
+                        )
+                    else:
+                        self.jobs[cgr][job.job_id] = self.scheduler.add_job(
+                            dmtask,
+                            job.trigger,
+                            args=[
+                                self.cfg.datamart,
+                                job
+                            ],
+                            executor=job.executor,
+                            id=job.job_id,
+                            name=job.job_id,
+                            misfire_grace_time=job.misfire_grace_time,
+                            max_instances=1,
+                            replace_existing=True
+                        )
+
+        if options.schedule and options.mode:
+            self.cfg.params.daemon = False
+            self.cfg.params.mode = options.mode
+            self.cfg.params.schedule = options.schedule
+            if options.cgrs:
+                self.cfg.params.cgrs = options.cgrs.split(',')
+        else:
+            print(self.scheduler.print_jobs())
+
+    def event_listener(self, event):
+        print(f'job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
+
+    def run(self):
+        if self.cfg.params.daemon:
+            self.scheduler.start()
+            try:
+                while True:
+                    time.sleep(2)
+            except (KeyboardInterrupt, SystemExit):
+                self.scheduler.shutdown()
+        else:
+            wqueue = _mp.Queue()
+            runner = _mp.Process(
+                        target=Runner(self.cfg).run,
+                        args=(),
+                        name='runner',
+                        daemon=False)
+            runner.start()
+
+def get_options():
+    parser = argparse.ArgumentParser(description="datamart update manager")
+    parser.add_argument(
+        "-c", "--cgrs", default=None, help="quoted, comma separated list of cgrs"
+    )
+    parser.add_argument(
+        "-d", "--debug", default=False, action="store_true", help="run with debug sleep comand"
+    )
+    parser.add_argument(
+        "-m", "--mode", default=None, help="run mode"
+    )
+    parser.add_argument(
+        "-p", "--path", default='./customer_cfgs',
+        help="Path for datamart cfgs"
+    )
+    parser.add_argument(
+        "-P", "--portal_path", default='/opt/portal',
+        help="Path to portal code base"
+    )
+    parser.add_argument(
+        "-s", "--schedule", default=None, help="top_off schedule override"
+    )
+    parser.add_argument(
+        "-t", "--timeout", default='1h', help="command timeout"
+    )
+    parser.add_argument(
+        "-w", "--workers", default=4, help="number of worker threads"
+    )
+    parser.add_argument("-H", "--HELP", help="Display extended help documentation")
+    options = parser.parse_args()
+    return options
+
+if __name__ == "__main__":
+    options = get_options()
+    datamart = Datamart(options)
+    datamart.run()

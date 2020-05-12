@@ -1,0 +1,7 @@
+{
+    "datamart_type": "pg",
+    "use_case": "mom",
+    "database": "iron_bulldog",
+    "top_off": "hourly",
+    "executor": "default"
+}

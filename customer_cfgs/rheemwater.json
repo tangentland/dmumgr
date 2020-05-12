@@ -1,0 +1,7 @@
+{
+    "datamart_type": "pg",
+    "use_case": "mom",
+    "database": "noheel_achilles",
+    "top_off": "hourly",
+    "executor": "default"
+}

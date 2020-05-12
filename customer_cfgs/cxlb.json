@@ -1,0 +1,7 @@
+{
+    "datamart_type": "pg",
+    "use_case": "yom",
+    "database": "unenthusiastic_ant",
+    "top_off": "hourly",
+    "executor": "default"
+}
