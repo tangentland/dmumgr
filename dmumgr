@@ -92,7 +92,6 @@ class Runner(object):
                 except Exception as e:
                     print(f'Runner error: {e} {type(e)}')
 
-
 def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
         query = params.tables[table].sql[qname](params.job)
@@ -112,7 +111,7 @@ def dmtask(dm_info, job):
             'cycles': './lib/datamart/incremental-dataloader/etl-cycles.js',
             'subjects': './lib/datamart/incremental-dataloader/index.js',
         })
-        params.job.cmd = f" cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         print(shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}'))
         print(cmd)
