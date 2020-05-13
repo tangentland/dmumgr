@@ -7,10 +7,10 @@ def shcmd(cmd, si=None, stdout=_sp.PIPE, stderr=_sp.PIPE, shell=True, cwd=None, 
     env_vars = {}
     env_vars.update(os.environ)
     if env is not None:
-        envvars.update(env)
+        env_vars.update(env)
 
     if not isinstance(cmd, list):
-        cmd = cmd.split(' ')
+        cmd = [cmd]
 
     cmdobj = _sp.run(cmd, shell=shell, stdout=stdout, stderr=stderr, cwd=cwd, timeout=timeout, env=env_vars)
 
