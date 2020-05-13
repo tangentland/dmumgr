@@ -139,9 +139,10 @@ def dmtask(dm_info, job):
 
     params = AD(dm_info)
     params.job = job
-    pp(f'Running job with cfg: {params}')
+    print(f'Running job with cfg: \n{params.jstr()}')
     mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
+        print(qinfo)
         qname, tables, qtype = qinfo
         for table in tables:
             run_query(params, qtype, table, qname)
