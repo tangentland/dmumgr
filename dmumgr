@@ -33,6 +33,7 @@ from threading import Thread
 import sched
 import time
 
+CURRENT_DIR = os.path.abspath(__file__)
 
 class GracefulInterruptHandler(object):
     def __init__(self, signals=(signal.SIGINT, signal.SIGTERM), funcs=[]):
@@ -101,8 +102,9 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
-        print(cmd)
-        print(shcmd(cmd, timeout=job.timeout))
+        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
+            print(cmd)
+            print(shcmd(cmd, timeout=job.timeout))
 
 
     def run_projection(params, projection):
@@ -113,9 +115,9 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        print(shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}'))
-        print(cmd)
-        print(shcmd(cmd, timeout=job.timeout))
+        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
+            print(cmd)
+            print(shcmd(cmd, timeout=job.timeout))
 
     params = AD(dm_info)
     params.job = job
@@ -411,7 +413,7 @@ class Datamart(object):
             #     **trigger_args
             #     )
 
-        for fn in sorted([f for f in shcmd(f'find {self.cfg.params.cfg_path} -name "*.json"|grep -v archive')[0] if len(f)]):
+        for fn in sorted([f for f in shcmd(f'find {CURRENT_DIR}/customer_cfgs -name "*.json"|grep -v archive')[0] if len(f)]):
             print(f'cfg_file: {fn}')
             if os.path.exists(fn):
                 cgr = fn.split('/')[-1].split('.')[0]
