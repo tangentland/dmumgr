@@ -105,6 +105,8 @@ def dmtask(dm_info, job):
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
             print(cmd)
             print(shcmd(cmd, timeout=job.timeout))
+        else:
+            print(f"{params.job.job_id} was not executed due to existing job running")
 
 
     def run_projection(params, projection):
@@ -118,6 +120,8 @@ def dmtask(dm_info, job):
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
             print(cmd)
             print(shcmd(cmd, timeout=job.timeout))
+        else:
+            print(f"{params.job.job_id} was not executed due to existing job running")
 
     params = AD(dm_info)
     params.job = job
