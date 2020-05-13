@@ -479,9 +479,8 @@ class Datamart(object):
             except (KeyboardInterrupt, SystemExit):
                 self.scheduler.shutdown()
         else:
-            runner =
             runner = _mp.Process(
-                target=Runner(self.cfg)run,
+                target=Runner(self.cfg).run,
                 args=(),
                 name='runner',
                 daemon=False
