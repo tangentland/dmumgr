@@ -419,7 +419,7 @@ class Datamart(object):
             #     **trigger_args
             #     )
 
-        for fn in sorted([f for f in shcmd(f'find {self.cfg.params.cfg_path} -name "*.json"|grep -v archive')[0].split('\n') if len(f)]):
+        for fn in sorted([f for f in shcmd(f'find {self.cfg.params.cfg_path} -name "*.json"|grep -v archive')[0] if len(f)]):
             print(f'cfg_file: {fn}')
             if os.path.exists(fn):
                 cgr = fn.split('/')[-1].split('.')[0]
