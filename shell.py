@@ -1,22 +1,23 @@
+import os
 import subprocess as _sp
 
-
-def shcmd(cmd, si=None, shell=True):
+def shcmd(cmd, si=None, stdout=_sp.PIPE, stderr=_sp.PIPE, shell=True, cwd=None, timeout=None, env=None):
     """Execute command using subprocess and returns a tuple (cmd output, cmd stderr, result code)"""
 
-    rawcmd = []
+    env_vars = {}
+    env_vars.update(os.environ)
+    if env is not None:
+        envvars.update(env)
+
     if not isinstance(cmd, list):
-        cmd = [cmd]
+        cmd = cmd.split(' ')
 
-    for c in cmd:
-        rawcmd.append("%s" % (c))
-
-    cmdobj = _sp.Popen(rawcmd, stdin=si, stdout=_sp.PIPE, stderr=_sp.PIPE, shell=shell)
+    cmdobj = _sp.run(cmd, shell=shell, stdout=stdout, stderr=stderr, cwd=cwd, timeout=timeout, env=env_vars)
 
     try:
-        (cmdout, cmderr) = cmdobj.communicate()
-        cmdout = cmdout.decode().split("\r\n")
-        res = (cmdout, cmderr, cmdobj.returncode)
+        stdout = [ln for ln in cmdobj.stdout.decode().split("\n") if len(ln)]
+        stderr = [ln for ln in cmdobj.stderr.decode().split("\n") if len(ln)]
+        res = (stdout, stderr, cmdobj.returncode)
         return res
     except OSError as e:
         return (None, e, cmdobj.returncode)
