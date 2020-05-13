@@ -11,7 +11,7 @@ from apscheduler.triggers.combining import AndTrigger, OrTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 import apscheduler.events as ape
-from concurrent.futures import ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 from datetime import date, datetime, timedelta, timezone
 from functools import partial
 import json
@@ -106,7 +106,7 @@ class Runner(object):
                 job.start_time = job.end_time - self.cfg.periods[job.period]
                 self.tasks.append((self.cfg.datamart, job))
             result_futures = [self.pool.submit(dmtask, args) for args in self.tasks]
-            for future in concurrent.futures.as_completed(result_futures):
+            for future in as_completed(result_futures):
                 try:
                     print('resutl is', future.result())
                 except Exception as e:
