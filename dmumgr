@@ -97,16 +97,13 @@ def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
         query = params.tables[table].sql[qname](params.job)
         query_bases = AD({
-            'system': f"psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.conn_info.database} -c '{query}'",
-            'datamart':  f"psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.job.database} -c '{query}'"
+            'system': f"PGPASSWORD='{params.conn_info.password}' psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.conn_info.database} -c '{query}'",
+            'datamart':  f"PGPASSWORD='{params.conn_info.password}' psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.job.database} -c '{query}'"
         })
         params.job.cmd = query_bases[qtype]
-        env_vars = {
-            "PGPASSWORD": params.conn_info.password
-        }
         cmd = params.job.cmd_string(params.job)
         print(cmd)
-        print(shcmd(cmd, timeout=job.timeout, env=env_vars))
+        print(shcmd(cmd, timeout=job.timeout))
 
 
     def run_projection(params, projection):
@@ -115,15 +112,11 @@ def dmtask(dm_info, job):
             'cycles': './lib/datamart/incremental-dataloader/etl-cycles.js',
             'subjects': './lib/datamart/incremental-dataloader/index.js',
         })
-        env_vars={
-            'DEBUG': 'portal*,-portal:instru*,-portal:db-query',
-            'NODE_ENV': params.job.cgr
-        }
-        params.job.cmd = f" cd {params.portal_path}; node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        params.job.cmd = f"DEBUG='portal*,-portal:instru*,-portal:db-query' cd {params.portal_path}; node --max-old-space-size=4096 {projections[projection]} --env='prd' --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}')[2] != 0:
-            print(cmd)
-            print(shcmd(cmd, timeout=job.timeout, cwd=params.portal_path, env=env_vars))
+        print(shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}'))
+        print(cmd)
+        print(shcmd(cmd, timeout=job.timeout))
 
     params = AD(dm_info)
     params.job = job
