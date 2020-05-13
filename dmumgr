@@ -420,8 +420,10 @@ class Datamart(object):
             #     )
 
         for fn in sorted([f for f in shcmd(f'find {self.cfg.params.cfg_path} -name "*.json"|grep -v archive')[0][0].split('\n') if len(f)]):
+            print(f'cfg_file: {fn}')
             if os.path.exists(fn):
                 cgr = fn.split('/')[-1].split('.')[0]
+                print(f'cgr: {cgr}')
                 self.cfg.job_defs[cgr] = AD()
                 self.jobs[cgr] = AD()
                 print(f"Loading {cgr}: {fn}")
