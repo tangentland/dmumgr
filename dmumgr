@@ -33,7 +33,7 @@ from threading import Thread
 import sched
 import time
 
-CURRENT_DIR = os.path.abspath(__file__)
+CURRENT_DIR = os.path.basedir(__file__)
 
 class GracefulInterruptHandler(object):
     def __init__(self, signals=(signal.SIGINT, signal.SIGTERM), funcs=[]):
