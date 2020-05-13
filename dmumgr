@@ -90,9 +90,10 @@ class GracefulInterruptHandler(object):
 
 class Runner(object):
     def __init__(self, cfg):
-        self.pool = ThreadPoolExecutor(max_workers=max_workers)
-        self.tasks = []
         self.cfg = cfg
+        self.pool = ThreadPoolExecutor(max_workers=self.cfg.params.workers)
+        self.tasks = []
+
 
     def run(self):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
