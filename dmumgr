@@ -105,7 +105,7 @@ class Runner(object):
                 job.end_time = datetime.utcnow()
                 job.start_time = job.end_time - self.cfg.periods[job.period]
                 self.tasks.append((self.cfg.datamart, job))
-            result_futures = [self.pool.submit(dmtask, args) for args in self.tasks]
+            result_futures = [self.pool.submit(dmtask, *args) for args in self.tasks]
             for future in as_completed(result_futures):
                 try:
                     print('resutl is', future.result())
