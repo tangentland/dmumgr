@@ -258,6 +258,7 @@ class Datamart(object):
                 'debug': options.debug,
                 'override': options.override,
                 'portal_path': options.portal_path,
+                'regenerate_period': int(options.regenerate_period),
                 'workers': int(options.workers)
             },
             'schedules': {
@@ -387,7 +388,16 @@ class Datamart(object):
                         'timeout': 179.5*60,
                         'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
-                    }
+                    },
+                    'regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_custom_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 3*60*60,
+                        'period': 'regenerate',
+                        'timeout': 179.5*60,
+                        'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
+                        'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_custom_regenerate.log 2>&1"
+                    },
                 }
             },
             'periods': {
@@ -395,7 +405,8 @@ class Datamart(object):
                 "hhourly": timedelta(minutes=30),
                 "qhourly": timedelta(minutes=15),
                 "daily": timedelta(days=1),
-                "weekly": timedelta(weeks=2)
+                "weekly": timedelta(weeks=2),
+                "regenerate": timedelta(weeks=int(options.regenerate_period))
             }
         })
 
@@ -511,6 +522,9 @@ def get_options():
     parser.add_argument(
         "-P", "--portal_path", default='/opt/portal',
         help="Path to portal code base"
+    )
+    parser.add_argument(
+        "-r", "--regenerate_period", default=0, help="regenerate period in weeks"
     )
     parser.add_argument(
         "-w", "--workers", default=4, help="number of worker threads"
