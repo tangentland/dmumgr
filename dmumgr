@@ -105,7 +105,13 @@ class Runner(object):
                 job.end_time = datetime.utcnow()
                 job.start_time = job.end_time - self.cfg.periods[job.period]
                 self.tasks.append((self.cfg.datamart, job))
-            results = self.pool.map(dmtask, self.tasks)
+            result_futures = list(map(lambda x: self.pool.submit(f, x), self.tasks))
+            for future in concurrent.futures.as_completed(result_futures):
+                try:
+                    print('resutl is', future.result())
+                except Exception as e:
+                    print(f'Runner error: {e} {type(e)')
+
 
 def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
@@ -138,6 +144,7 @@ def dmtask(dm_info, job):
     for projection in mode_cfg.projections[job.use_case]:
         if projection in params.job.projections:
             run_projection(params, projection)
+    return f"{job.job_id} - Done."
 
 class Datamart(object):
     def __init__(self, options):
@@ -472,9 +479,14 @@ class Datamart(object):
             except (KeyboardInterrupt, SystemExit):
                 self.scheduler.shutdown()
         else:
-            wqueue = _mp.Queue()
-            runner = Runner(self.cfg)
-            runner.run()
+            runner =
+            runner = _mp.Process(
+                target=Runner(self.cfg)run,
+                args=(),
+                name='runner',
+                daemon=False
+            )
+            runner.start()
 
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
