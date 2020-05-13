@@ -1,7 +1,7 @@
 import os
 import subprocess as _sp
 
-def shcmd(cmd, si=None, stdout=_sp.PIPE, stderr=_sp.PIPE, shell=True, cwd=None, timeout=None, env=None):
+def shcmd(cmd, si=None, stdout=None, stderr=None, shell=True, cwd=None, timeout=None, env=None):
     """Execute command using subprocess and returns a tuple (cmd output, cmd stderr, result code)"""
 
     env_vars = {}
