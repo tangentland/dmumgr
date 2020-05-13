@@ -110,7 +110,7 @@ class Runner(object):
                 try:
                     print('resutl is', future.result())
                 except Exception as e:
-                    print(f'Runner error: {e} {type(e)')
+                    print(f'Runner error: {e} {type(e)}')
 
 
 def dmtask(dm_info, job):
@@ -479,13 +479,14 @@ class Datamart(object):
             except (KeyboardInterrupt, SystemExit):
                 self.scheduler.shutdown()
         else:
-            runner = _mp.Process(
-                target=Runner(self.cfg).run,
-                args=(),
-                name='runner',
-                daemon=False
-            )
-            runner.start()
+            # runner = _mp.Process(
+            #     target=Runner(self.cfg).run,
+            #     args=(),
+            #     name='runner',
+            #     daemon=False
+            # )
+            # runner.start()
+            Runner(self.cfg).run()
 
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
