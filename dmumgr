@@ -108,7 +108,7 @@ class Runner(object):
             result_futures = [self.pool.submit(dmtask, *args) for args in self.tasks]
             for future in as_completed(result_futures):
                 try:
-                    print('resutl is', future.result())
+                    print('result is', future.result())
                 except Exception as e:
                     print(f'Runner error: {e} {type(e)}')
 
@@ -121,7 +121,9 @@ def dmtask(dm_info, job):
             'datamart':  f"psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.job.database} -c '{query}'"
         })
         params.job.cmd = query_bases[qtype]
-        os.system(f"PGPASSWORD='{params.conn_info.password}' " + params.job.cmd_string(params.job))
+        cmd = f"PGPASSWORD='{params.conn_info.password}' " + params.job.cmd_string(params.job)
+        print(cmd)
+        os.system(cmd)
 
     def run_projection(params, projection):
         projections = AD({
@@ -131,11 +133,13 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = f"node --max-old-space-size=4096 {projections[projection]} --env='prd' --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         if shcmd(f'ps ax | grep node | grep [{params.job.job_id[0]}]{params.job.job_id[1:]}')[2] != 0:
-            os.system(f"cd {params.portal_path}; {params.job.cmd_string(params.job)}")
+            cmd = f"cd {params.portal_path}; {params.job.cmd_string(params.job)}"
+            print(cmd)
+            os.system(cmd)
 
     params = AD(dm_info)
     params.job = job
-    print(f'Running job with cfg: {params}')
+    pp(f'Running job with cfg: {params}')
     mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
         qname, tables, qtype = qinfo
