@@ -97,14 +97,17 @@ def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
         query = params.tables[table].sql[qname](params.job)
         query_bases = AD({
-            'system': f"PGPASSWORD='{params.conn_info.password}' time psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.conn_info.database} -c {query}",
-            'datamart':  f"PGPASSWORD='{params.conn_info.password}' time psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.job.database} -c {query}"
+            'system': f"PGPASSWORD='{params.conn_info.password}' psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.conn_info.database} -c {query}",
+            'datamart':  f"PGPASSWORD='{params.conn_info.password}' psql --host={params.conn_info.host} --port=5432 --username={params.conn_info.user} --dbname={params.job.database} -c {query}"
         })
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
             print(cmd)
+            start = datetime.now()
             print(shcmd(cmd, timeout=job.timeout))
+            end = datetime.now()
+            print(f'Execution of query {params.job.job_id} took: {end - start}')
         else:
             print(f"{params.job.job_id} was not executed due to existing job running")
 
@@ -115,11 +118,14 @@ def dmtask(dm_info, job):
             'cycles': './lib/datamart/incremental-dataloader/etl-cycles.js',
             'subjects': './lib/datamart/incremental-dataloader/index.js',
         })
-        params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' time node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
             print(cmd)
+            start = datetime.now()
             print(shcmd(cmd, timeout=job.timeout))
+            end = datetime.now()
+            print(f'Execution of projection {params.job.job_id} took: {end - start}')
         else:
             print(f"{params.job.job_id} was not executed due to existing job running")
 
