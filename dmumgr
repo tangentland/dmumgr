@@ -252,7 +252,7 @@ class Datamart(object):
                 },
             },
             'params': {
-                'cfg_path': options.path,
+                'cfg_path': options.cfg_path,
                 'cgrs': [],
                 'daemon': True,
                 'debug': options.debug,
@@ -428,7 +428,7 @@ class Datamart(object):
             #     **trigger_args
             #     )
 
-        for fn in sorted([f for f in shcmd(f'find {CURRENT_DIR}/customer_cfgs -name "*.json"|grep -v archive')[0] if len(f)]):
+        for fn in sorted([f for f in shcmd(f'find {options.cfg_path} -name "*.json"|grep -v archive')[0] if len(f)]):
             print(f'cfg_file: {fn}')
             if os.path.exists(fn):
                 cgr = fn.split('/')[-1].split('.')[0]
@@ -516,11 +516,11 @@ def get_options():
         "-o", "--override", default=None, help="override run mode <top_off|daily_regenerate|weekly_regenerate>"
     )
     parser.add_argument(
-        "-p", "--path", default='./customer_cfgs',
+        "-p", "--cfg_path", default=f'{CURRENT_DIR}/customer_cfgs',
         help="Path for datamart cfgs"
     )
     parser.add_argument(
-        "-P", "--portal_path", default='/opt/portal',
+        "-P", "--portal_path", default=f'{CURRENT_DIR}/portal',
         help="Path to portal code base"
     )
     parser.add_argument(
