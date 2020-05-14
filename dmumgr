@@ -167,6 +167,10 @@ class Datamart(object):
 
         self.cfg = AD({
             'datamarts': {},
+            'dm_groups': {
+                'mom': [],
+                'yom': []
+            },
             'job_defs': {},
             'modes': {
                 'hourly': [],
@@ -434,6 +438,7 @@ class Datamart(object):
                 cgr = fn.split('/')[-1].split('.')[0]
                 print(f'cgr: {cgr}')
                 self.cfg.job_defs[cgr] = AD()
+                self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.jobs[cgr] = AD()
                 print(f"Loading {cgr}: {fn}")
                 ccfg = self.cfg.datamarts[cgr] = AD.load(fn)
@@ -480,6 +485,8 @@ class Datamart(object):
             self.cfg.params.daemon = False
             if options.cgrs:
                 self.cfg.params.cgrs = options.cgrs.split(',')
+            elif options.group:
+                self.cfg.params.cgrs = self.cfg.dm_groups[options.group]
         else:
             print(self.scheduler.print_jobs())
 
@@ -511,6 +518,9 @@ def get_options():
     )
     parser.add_argument(
         "-d", "--debug", default=False, action="store_true", help="run with debug sleep comand"
+    )
+    parser.add_argument(
+        "-g", "--group", default=None, help="group to use in override run mode <mom|yom>"
     )
     parser.add_argument(
         "-o", "--override", default=None, help="override run mode <top_off|daily_regenerate|weekly_regenerate>"
