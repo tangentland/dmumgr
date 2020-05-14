@@ -438,10 +438,10 @@ class Datamart(object):
                 cgr = fn.split('/')[-1].split('.')[0]
                 print(f'cgr: {cgr}')
                 self.cfg.job_defs[cgr] = AD()
-                self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.jobs[cgr] = AD()
                 print(f"Loading {cgr}: {fn}")
                 ccfg = self.cfg.datamarts[cgr] = AD.load(fn)
+                self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.cfg.params.cgrs.append(cgr)
                 self.cfg.modes[ccfg.top_off].append(cgr)
                 for job_type, job_tmpl in self.cfg.schedules[ccfg.top_off].items():
