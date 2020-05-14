@@ -102,7 +102,7 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
+        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
             print(cmd)
             print(shcmd(cmd, timeout=job.timeout))
         else:
@@ -117,7 +117,7 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' time node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\={params.job.cgr}'")[2] != 0:
+        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
             print(cmd)
             print(shcmd(cmd, timeout=job.timeout))
         else:
