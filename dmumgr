@@ -394,7 +394,7 @@ class Datamart(object):
                         'mode': 'regenerate',
                         'misfire_grace_time': 3*60*60,
                         'period': 'regenerate',
-                        'timeout': options.regenerate_period * 60 * 60,
+                        'timeout': int(options.regenerate_period) * 60 * 60,
                         'trigger': CronTrigger(day_of_week='sun', hour='0', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_custom_regenerate.log 2>&1"
                     },
