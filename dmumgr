@@ -209,6 +209,7 @@ class Datamart(object):
                                 ['delete_sync_markers', ['datamart_sync'], 'system'],
                                 ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
                                 ['delete_cycles', ['f_cycles_summarized'], 'datamart'],
+                                ['delete_events', ['f_events'], 'datamart'],
                                 ['delete_intervals', ['f_intervals'], 'datamart']
                             ]
                         }
