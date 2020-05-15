@@ -498,6 +498,8 @@ class Datamart(object):
                 self.cfg.params.cgrs = options.cgrs.split(',')
             elif options.group:
                 self.cfg.params.cgrs = sorted(self.cfg.dm_groups[options.group])[::-1]
+            else:
+                self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
         else:
             print(self.scheduler.print_jobs())
 
