@@ -216,7 +216,6 @@ class Datamart(object):
                 'qhourly': []
             },
             'datamart': {
-
                 'conn_info': {
                     'user': 'atollogy',
                     'host': 'analytics.ccbxi26o2tim.us-west-2.rds.amazonaws.com',
@@ -457,6 +456,8 @@ class Datamart(object):
             }
         })
 
+        self.cfg.portal.path = f'{CURRENT_DIR}/{self.cfg.portal.path}'
+
         # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
             # add_job (
             #     func,
@@ -539,6 +540,7 @@ class Datamart(object):
         logger.info(f'{datetime.utcnow()} -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
 
     def run(self):
+        self.setup_portal()
         if self.cfg.params.daemon:
             self.scheduler.start()
             try:
@@ -548,6 +550,15 @@ class Datamart(object):
                 self.scheduler.shutdown()
         else:
             Runner(self.cfg).run()
+
+    def setup_portal(self):
+        if not os.path.exists(self.cfg.datamart.portal.path):
+            shcmd(f'git clone {self.cfg.datamart.portal.repo} {self.cfg.datamart.portal.path}')
+            shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
+        else:
+            shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
+            shcmd(f'cd {self.cfg.datamart.portal.path} && git pull')
+
 
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
