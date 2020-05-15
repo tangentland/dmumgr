@@ -118,7 +118,7 @@ def dmtask(dm_info, job):
             'cycles': './lib/datamart/incremental-dataloader/etl-cycles.js',
             'subjects': './lib/datamart/incremental-dataloader/index.js',
         })
-        params.job.cmd = f"cd {params.portal_path}; NODE_ENV='prd' BCM_ENV_NAME='prd' DEBUG='portal*,-portal:instru*,-portal:db-query' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        params.job.cmd = f"cd {params.portal_path}; NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:instr*,-portal:db-query,-portal:metrics' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start='{params.job.start_time}' --stop='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
             print(cmd)
