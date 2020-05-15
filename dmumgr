@@ -24,7 +24,7 @@ from multiprocessing import current_process, Pool, Queue
 from operator import itemgetter, attrgetter
 import os
 from os import devnull, kill
-from pprint import pprint as pp
+from plogger.info import plogger.info as pp
 from pytz import timezone
 import signal
 import subprocess as _sp
@@ -34,6 +34,38 @@ import sched
 import time
 
 CURRENT_DIR = os.path.dirname(__file__)
+
+
+# --------------------------------------------------------------------------------------------------------------
+### setup logging
+logger = logging.getLogger("dmumgr")
+
+def start_logger(logLevel):
+    LOG_PATH = "/var/log/atollogy/dmumgr"
+    LOG_NAME = f"{LOG_PATH}/dmumgr.log"
+    LOG_SIZE = 20000000  # 20MB
+    LOG_ROTATION_COUNT = 10
+    LOG_LEVEL = 20
+
+    if loglevel.isnumeric():
+        LOG_LEVEL = int(logLevel)
+    elif hasattr(logging, loglevel.upper()):
+        LOG_LEVEL = getattr(logging, loglevel.upper())
+
+    # Create log folder
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+
+    formatter = logging.Formatter(
+        '{"timestamp": "%(asctime)s", "thread": "%(threadName)s", "syslog.appname": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+    )
+    floghandler = RotatingFileHandler(LOG_NAME, maxBytes=LOG_SIZE, backupCount=LOG_ROTATION_COUNT)
+    floghandler.setLevel(LOG_LEVEL)
+    floghandler.setFormatter(formatter)
+
+    logger.addHandler(floghandler)
+    logger.setLevel(LOG_LEVEL)
+
 
 class GracefulInterruptHandler(object):
     def __init__(self, signals=(signal.SIGINT, signal.SIGTERM), funcs=[]):
@@ -75,7 +107,6 @@ class Runner(object):
         self.pool = ThreadPoolExecutor(max_workers=self.cfg.params.workers)
         self.tasks = []
 
-
     def run(self):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
             for cgr in self.cfg.params.cgrs:
@@ -89,9 +120,9 @@ class Runner(object):
             result_futures = [self.pool.submit(dmtask, *args) for args in self.tasks]
             for future in as_completed(result_futures):
                 try:
-                    print('result is', future.result())
+                    logger.info(f'result is: {future.result()}')
                 except Exception as e:
-                    print(f'Runner error: {e} {type(e)}')
+                    logger.info(f'Runner error: {e} {type(e)}')
 
 def dmtask(dm_info, job):
     def run_query(params, qtype, table, qname):
@@ -103,38 +134,38 @@ def dmtask(dm_info, job):
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
-            print(cmd)
+            logger.debug(cmd)
             start = datetime.now()
-            print(shcmd(cmd, timeout=job.timeout))
+            logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
-            print(f'Execution of query {params.job.job_id} took: {end - start}')
+            logger.info(f'Execution of query {params.job.job_id} took: {end - start}')
         else:
-            print(f"{params.job.job_id} was not executed due to existing job running")
-
+            logger.info(f"{params.job.job_id} was not executed due to existing job running")
 
     def run_projection(params, projection):
-        projections = AD({
-            'beacons': './lib/datamart/incremental-dataloader/etl-beacons.js',
-            'cycles': './lib/datamart/incremental-dataloader/etl-cycles.js',
-            'subjects': './lib/datamart/incremental-dataloader/index.js',
-        })
-        params.job.cmd = f"cd {params.portal_path}; NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:instr*,-portal:db-query,-portal:metrics' node --max-old-space-size=4096 {projections[projection]} --datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time}' --stop-date='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        if params.portal.sync:
+            shcmd(f"cd {CURRENT_DIR}/{params.portal.path}; git pull")
+        params.job.cmd = f"cd {CURRENT_DIR}/{params.portal.path}; NODE_ENV=prd BCM_ENV_NAME=prd "
+        params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:instr*,-portal:db-query,-portal:metrics' "
+        params.job.cmd += f"node --max-old-space-size=4096 {params.portal.projections[projection]} "
+        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time}' "
+        params.job.cmd += f"--stop-date='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
-            print(cmd)
+            logger.debug(cmd)
             start = datetime.now()
-            print(shcmd(cmd, timeout=job.timeout))
+            logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
-            print(f'Execution of projection {params.job.job_id} took: {end - start}')
+            logger.info(f'Execution of projection {params.job.job_id} took: {end - start}')
         else:
-            print(f"{params.job.job_id} was not executed due to existing job running")
+            logger.info(f"{params.job.job_id} was not executed due to existing job running")
 
     params = AD(dm_info)
     params.job = job
-    print(f'Running job with cfg: \n{params.jstr()}')
+    logger.info(f'Running job with cfg: \n{params.jstr()}')
     mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
-        print(qinfo)
+        logger.info(qinfo)
         #  ['delete_sync_markers', ['datamart_sync'], 'system'],
         qname, tables, qtype = qinfo
         for table in tables:
@@ -185,7 +216,7 @@ class Datamart(object):
                 'qhourly': []
             },
             'datamart': {
-                'portal_path': options.portal_path,
+
                 'conn_info': {
                     'user': 'atollogy',
                     'host': 'analytics.ccbxi26o2tim.us-west-2.rds.amazonaws.com',
@@ -227,6 +258,7 @@ class Datamart(object):
                         }
                     }
                 },
+                'portal': AD.load(f'{CURRENT_DIR}/portal_cfg.json'),
                 'tables': {
                     'datamart_sync': {
                       'ttype': 'system',
@@ -444,13 +476,13 @@ class Datamart(object):
             #     )
 
         for fn in sorted([f for f in shcmd(f'find {options.cfg_path} -name "*.json"|grep -v archive')[0] if len(f)]):
-            print(f'cfg_file: {fn}')
+            logger.info(f'cfg_file: {fn}')
             if os.path.exists(fn):
                 cgr = fn.split('/')[-1].split('.')[0]
-                print(f'cgr: {cgr}')
+                logger.info(f'cgr: {cgr}')
                 self.cfg.job_defs[cgr] = AD()
                 self.jobs[cgr] = AD()
-                print(f"Loading {cgr}: {fn}")
+                logger.info(f"Loading {cgr}: {fn}")
                 ccfg = self.cfg.datamarts[cgr] = AD.load(fn)
                 self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.cfg.params.cgrs.append(cgr)
@@ -501,10 +533,10 @@ class Datamart(object):
             else:
                 self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
         else:
-            print(self.scheduler.print_jobs())
+            logger.info(self.scheduler.logger.info_jobs())
 
     def event_listener(self, event):
-        print(f'{datetime.utcnow()} -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
+        logger.info(f'{datetime.utcnow()} -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
 
     def run(self):
         if self.cfg.params.daemon:
@@ -515,39 +547,42 @@ class Datamart(object):
             except (KeyboardInterrupt, SystemExit):
                 self.scheduler.shutdown()
         else:
-            # runner = _mp.Process(
-            #     target=Runner(self.cfg).run,
-            #     args=(),
-            #     name='runner',
-            #     daemon=False
-            # )
-            # runner.start()
             Runner(self.cfg).run()
 
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
     parser.add_argument(
-        "-c", "--cgrs", default=None, help="quoted, comma separated list of cgrs"
+        "-b", "--branch", default="release", help="Portal branch to use for datamart projections"
     )
     parser.add_argument(
-        "-d", "--debug", default=False, action="store_true", help="run with debug sleep comand"
+        "-c", "--cgrs", default=None, help="quoted, comma separated list of cgrs <'cgr1,cgr2'>"
     )
     parser.add_argument(
-        "-g", "--group", default=None, help="group to use in override run mode <mom|yom>"
+        "-d", "--debug", default=False, action="store_true", help="run with debug null sleep command"
     )
     parser.add_argument(
-        "-o", "--override", default=None, help="override run mode <top_off|daily_regenerate|weekly_regenerate>"
+        "-g", "--group", default=None, help="group to use in override run mode [none] <mom|yom>"
+    )
+    parser.add_argument(
+        "-l", "--log_level", default='warn', help="set logging level output level [warn] <critical|debug|error|fatal|warn>"
+    )
+    parser.add_argument(
+        "-o", "--override", default=None, help="override run mode [none] <top_off|daily_regenerate|weekly_regenerate>"
     )
     parser.add_argument(
         "-p", "--cfg_path", default=f'{CURRENT_DIR}/customer_cfgs',
-        help="Path for datamart cfgs"
+        help="Path for datamart cfgs: <./customer_cfgs>"
     )
     parser.add_argument(
         "-P", "--portal_path", default=f'{CURRENT_DIR}/portal',
-        help="Path to portal code base"
+        help="Path to portal code base <./portal>"
     )
     parser.add_argument(
         "-r", "--regenerate_period", default=0, help="regenerate period in weeks"
+    )
+    parser.add_argument(
+        "-s", "--sync_portal_disable", default=False, action="store_true",
+        help="disable git pull of portal repo before executing projections [false]"
     )
     parser.add_argument(
         "-w", "--workers", default=4, help="number of worker threads"
@@ -558,5 +593,6 @@ def get_options():
 
 if __name__ == "__main__":
     options = get_options()
+    start_logger(options.loglevel)
     datamart = Datamart(options)
     datamart.run()
