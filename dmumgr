@@ -35,7 +35,6 @@ import time
 
 CURRENT_DIR = os.path.dirname(__file__)
 
-
 # --------------------------------------------------------------------------------------------------------------
 ### setup logging
 logger = logging.getLogger("dmumgr")
@@ -65,7 +64,6 @@ def start_logger(logLevel):
 
     logger.addHandler(floghandler)
     logger.setLevel(LOG_LEVEL)
-
 
 class GracefulInterruptHandler(object):
     def __init__(self, signals=(signal.SIGINT, signal.SIGTERM), funcs=[]):
@@ -602,6 +600,7 @@ def get_options():
     options = parser.parse_args()
     return options
 
+#--------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     options = get_options()
     start_logger(options.loglevel)
