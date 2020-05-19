@@ -24,7 +24,7 @@ from multiprocessing import current_process, Pool, Queue
 from operator import itemgetter, attrgetter
 import os
 from os import devnull, kill
-from plogger.info import plogger.info as pp
+from pprint import pprint as pp
 from pytz import timezone
 import signal
 import subprocess as _sp
