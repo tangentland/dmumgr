@@ -603,6 +603,6 @@ def get_options():
 #--------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     options = get_options()
-    start_logger(options.loglevel)
+    start_logger(options.log_level)
     datamart = Datamart(options)
     datamart.run()
