@@ -4,7 +4,7 @@
     "projections": {
         "beacons": "./lib/datamart/incremental-dataloader/etl-beacons.js",
         "cycles": "./lib/datamart/incremental-dataloader/etl-cycles.js",
-        "subjects": "./lib/datamart/incremental-dataloader/index.js",
+        "subjects": "./lib/datamart/incremental-dataloader/index.js"
     },
     "repo": "git@bitbucket.org:atollogy/portal.git",
     "sync": true
