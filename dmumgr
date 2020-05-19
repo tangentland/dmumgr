@@ -144,7 +144,7 @@ def dmtask(dm_info, job):
         if params.portal.sync:
             shcmd(f"cd {CURRENT_DIR}/{params.portal.path}; git pull")
         params.job.cmd = f"cd {CURRENT_DIR}/{params.portal.path}; NODE_ENV=prd BCM_ENV_NAME=prd "
-        params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:instr*,-portal:db-query,-portal:metrics' "
+        params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' "
         params.job.cmd += f"node --max-old-space-size=4096 {params.portal.projections[projection]} "
         params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time}' "
         params.job.cmd += f"--stop-date='{params.job.end_time}' --job_id='{params.job.job_id}'"
