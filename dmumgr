@@ -141,7 +141,7 @@ def dmtask(dm_info, job):
 
     def run_projection(params, projection):
         if params.portal.sync:
-            shcmd(f"cd {CURRENT_DIR}/{params.portal.path}; git pull")
+            shcmd(f"cd {CURRENT_DIR}/{params.portal.path} && git pull")
         params.job.cmd = f"cd {CURRENT_DIR}/{params.portal.path}; NODE_ENV=prd BCM_ENV_NAME=prd "
         params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' "
         params.job.cmd += f"node --max-old-space-size=4096 {params.portal.projections[projection]} "
