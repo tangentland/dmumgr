@@ -17,9 +17,6 @@ from functools import partial
 import json
 import logging
 from logging.handlers import RotatingFileHandler
-
-logger = logging.getLogger("dmumgr")
-
 import multiprocessing as _mp
 from multiprocessing import current_process, Pool, Queue
 from operator import itemgetter, attrgetter
@@ -574,7 +571,7 @@ def get_options():
         "-g", "--group", default=None, help="group to use in override run mode [none] <mom|yom>"
     )
     parser.add_argument(
-        "-l", "--log_level", default='warn', help="set logging level output level [warn] <critical|debug|error|fatal|warn>"
+        "-l", "--log_level", default='info', help="set logging level output level [info] <critical|debug|error|fatal|warn|info>"
     )
     parser.add_argument(
         "-o", "--override", default=None, help="override run mode [none] <top_off|daily_regenerate|weekly_regenerate>"
