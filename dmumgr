@@ -455,7 +455,7 @@ class Datamart(object):
             }
         })
 
-        self.cfg.portal.path = options.cfg_path
+        self.cfg.datamart.portal.path = options.portal_path
 
         # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
             # add_job (
