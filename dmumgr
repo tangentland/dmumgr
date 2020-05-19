@@ -134,8 +134,8 @@ def dmtask(dm_info, job):
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
-            logger.info(f'{params.job.job_id}: query {gname} execution time was {end - start}')
-            logger.info(f'{params.job.job_id}: query {gname} query detail: "{query}"')
+            logger.info(f'{params.job.job_id}: query {qname} execution time was {end - start}')
+            logger.info(f'{params.job.job_id}: query {qname} query detail: "{query}"')
         else:
             logger.info(f"{params.job.job_id}: {qname} was not executed due to an existing job running")
 
