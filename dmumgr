@@ -134,9 +134,10 @@ def dmtask(dm_info, job):
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
-            logger.info(f'Execution of query {params.job.job_id} took: {end - start}')
+            logger.info(f'{params.job.job_id}: query {gname} execution time was {end - start}')
+            logger.info(f'{params.job.job_id}: query {gname} query detail: "{query}"')
         else:
-            logger.info(f"{params.job.job_id} was not executed due to existing job running")
+            logger.info(f"{params.job.job_id}: {qname} was not executed due to an existing job running")
 
     def run_projection(params, projection):
         if params.portal.sync:
@@ -152,9 +153,9 @@ def dmtask(dm_info, job):
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
-            logger.info(f'Execution of projection {params.job.job_id} took: {end - start}')
+            logger.info(f'{params.job.job_id}: projection {projection} execution time was {end - start}')
         else:
-            logger.info(f"{params.job.job_id} was not executed due to existing job running")
+            logger.info(f"{params.job.job_id}: projection {projection} was not executed due to an existing job running")
 
     params = AD(dm_info)
     params.job = job
