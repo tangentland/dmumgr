@@ -531,7 +531,7 @@ class Datamart(object):
             else:
                 self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
         else:
-            logger.info(self.scheduler.logger.info_jobs())
+            logger.info(self.scheduler.print_jobs())
 
     def event_listener(self, event):
         logger.info(f'{datetime.utcnow()} -> job event[{self.event_codes.by_id[event.code]}]: {repr(event)}')
