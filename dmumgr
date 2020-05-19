@@ -39,17 +39,17 @@ CURRENT_DIR = os.path.dirname(__file__)
 ### setup logging
 logger = logging.getLogger("dmumgr")
 
-def start_logger(logLevel):
+def start_logger(log_level):
     LOG_PATH = "/var/log/atollogy/dmumgr"
     LOG_NAME = f"{LOG_PATH}/dmumgr.log"
     LOG_SIZE = 20000000  # 20MB
     LOG_ROTATION_COUNT = 10
     LOG_LEVEL = 20
 
-    if loglevel.isnumeric():
-        LOG_LEVEL = int(logLevel)
-    elif hasattr(logging, loglevel.upper()):
-        LOG_LEVEL = getattr(logging, loglevel.upper())
+    if log_level.isnumeric():
+        LOG_LEVEL = int(log_level)
+    elif isinstance(log_level, str) and  hasattr(logging, log_level.upper()):
+        LOG_LEVEL = getattr(logging, log_level.upper())
 
     # Create log folder
     if not os.path.exists(LOG_PATH):
