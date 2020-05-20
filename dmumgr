@@ -17,7 +17,6 @@ from functools import partial
 import json
 import logging
 from logging.handlers import RotatingFileHandler
-import multiprocessing as _mp
 from multiprocessing import current_process, Pool, Queue
 from operator import itemgetter, attrgetter
 import os
@@ -111,7 +110,7 @@ class Runner(object):
                 job.cgr = cgr
                 job.job_id = job.job_id(job)
                 job.end_time = datetime.utcnow()
-                job.start_time = job.end_time - self.cfg.periods[job.period]
+                job.start_time = job.end_time - self.cfg.datamart.periods[job.period]
                 self.tasks.append((self.cfg.datamart, job))
             result_futures = [self.pool.submit(dmtask, *args) for args in self.tasks]
             for future in as_completed(result_futures):
@@ -157,6 +156,8 @@ def dmtask(dm_info, job):
         else:
             logger.info(f"{params.job.job_id}: projection {projection} was not executed due to an existing job running")
 
+    job.end_time = datetime.utcnow()
+    job.start_time = job.end_time - dm_info.periods[job.period]
     params = AD(dm_info)
     params.job = job
     logger.info(f'Running job with cfg: \n{params.jstr()}')
@@ -254,6 +255,14 @@ class Datamart(object):
                         }
                     }
                 },
+                'periods': {
+                    "hourly": timedelta(hours=1),
+                    "hhourly": timedelta(minutes=30),
+                    "qhourly": timedelta(minutes=15),
+                    "daily": timedelta(days=1),
+                    "weekly": timedelta(weeks=2),
+                    "regenerate": timedelta(weeks=int(options.regenerate_period))
+                },
                 'portal': AD.load(f'{CURRENT_DIR}/portal_cfg.json'),
                 'tables': {
                     'datamart_sync': {
@@ -292,7 +301,7 @@ class Datamart(object):
                         'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  BETWEEN '{p.start_time}' AND now();\""
                       }
                     }
-                },
+                }
             },
             'params': {
                 'cfg_path': options.cfg_path,
@@ -442,14 +451,6 @@ class Datamart(object):
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_custom_regenerate.log 2>&1"
                     },
                 }
-            },
-            'periods': {
-                "hourly": timedelta(hours=1),
-                "hhourly": timedelta(minutes=30),
-                "qhourly": timedelta(minutes=15),
-                "daily": timedelta(days=1),
-                "weekly": timedelta(weeks=2),
-                "regenerate": timedelta(weeks=int(options.regenerate_period))
             }
         })
 
@@ -490,8 +491,6 @@ class Datamart(object):
                     job.update(ccfg)
                     job.cgr = cgr
                     job.job_id = job.job_id(job)
-                    job.end_time = datetime.utcnow()
-                    job.start_time = job.end_time - self.cfg.periods[job.period]
                     self.cfg.job_defs[cgr][job_type] = job
                     if self.cfg.params.debug:
                         self.jobs[cgr][job.job_id] = self.scheduler.add_job(
@@ -593,7 +592,7 @@ def get_options():
         help="disable git pull of portal repo before executing projections [false]"
     )
     parser.add_argument(
-        "-w", "--workers", default=4, help="number of worker threads"
+        "-w", "--workers", default=8, help="number of worker threads"
     )
     parser.add_argument("-H", "--HELP", help="Display extended help documentation")
     options = parser.parse_args()
