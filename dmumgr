@@ -135,8 +135,10 @@ def dmtask(dm_info, job):
             end = datetime.now()
             logger.info(f'{params.job.job_id}: query {qname} execution time was {end - start}')
             logger.info(f'{params.job.job_id}: query {qname} query detail: "{query}"')
+            return True
         else:
             logger.info(f"{params.job.job_id}: {qname} was not executed due to an existing job running")
+            return False
 
     def run_projection(params, projection):
         if params.portal.sync:
@@ -167,10 +169,11 @@ def dmtask(dm_info, job):
         #  ['delete_sync_markers', ['datamart_sync'], 'system'],
         qname, tables, qtype = qinfo
         for table in tables:
-            run_query(params, qtype, table, qname)
-    for projection in mode_cfg.projections[job.use_case]:
-        if projection in params.job.projections:
-            run_projection(params, projection)
+            was_run = run_query(params, qtype, table, qname)
+            if not was_run:
+                return f"{job.job_id} - NOT EXCUTED."
+    for projection in params.job.projections:
+        run_projection(params, projection)
     return f"{job.job_id} - Done."
 
 class Datamart(object):
