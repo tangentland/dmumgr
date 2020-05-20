@@ -552,7 +552,7 @@ class Datamart(object):
         if not os.path.exists(self.cfg.datamart.portal.path):
             shcmd(f'git clone {self.cfg.datamart.portal.repo} {self.cfg.datamart.portal.path}')
             shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
-        else:
+        elif self.cfg.datamart.portal.sync:
             shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
             shcmd(f'cd {self.cfg.datamart.portal.path} && git pull')
 
