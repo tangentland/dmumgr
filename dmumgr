@@ -171,7 +171,7 @@ def dmtask(dm_info, job):
         for table in tables:
             was_run = run_query(params, qtype, table, qname)
             if not was_run:
-                return f"{job.job_id} - NOT EXCUTED."
+                return f"{job.job_id} - NOT EXECUTED."
     for projection in params.job.projections:
         run_projection(params, projection)
     return f"{job.job_id} - Done."
@@ -264,7 +264,10 @@ class Datamart(object):
                     "qhourly": timedelta(minutes=15),
                     "daily": timedelta(days=1),
                     "weekly": timedelta(weeks=2),
-                    "regenerate": timedelta(weeks=int(options.regenerate_period))
+                    "hourly_regenerate": timedelta(hours=int(options.regenerate_period)),
+                    "daily_regenerate": timedelta(days=int(options.regenerate_period)),
+                    "weekly_regenerate": timedelta(weeks=int(options.regenerate_period)),
+                    "monthly_regenerate": timedelta(weeks=4.3 * int(options.regenerate_period))
                 },
                 'portal': AD.load(f'{CURRENT_DIR}/portal_cfg.json'),
                 'tables': {
@@ -426,12 +429,21 @@ class Datamart(object):
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_hourly_top_off.log 2>&1"
                     },
+                    'hourly_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_hourly_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 90*60,
+                        'period': 'hourly_regenerate',
+                        'timeout': int(options.regenerate_period) * 5 * 60,
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='7', minute='0'),
+                        'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                    },
                     'daily_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_daily_regenerate',
                         'mode': 'regenerate',
                         'misfire_grace_time': 90*60,
-                        'period': 'daily',
-                        'timeout': 59.5*60,
+                        'period': 'daily_regenerate',
+                        'timeout': int(options.regenerate_period) * 15 * 60,
                         'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='7', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
                     },
@@ -439,16 +451,16 @@ class Datamart(object):
                         'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
                         'mode': 'regenerate',
                         'misfire_grace_time': 3*60*60,
-                        'period': 'weekly',
-                        'timeout': 179.5*60,
+                        'period': 'weekly_regenerate',
+                        'timeout': int(options.regenerate_period) * 30 * 60,
                         'trigger': CronTrigger(day_of_week='sun', hour='7', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
                     },
-                    'regenerate': {
+                    'monthly_regenerate': {
                         'job_id': lambda p: f'{p.cgr}_custom_regenerate',
                         'mode': 'regenerate',
                         'misfire_grace_time': 3*60*60,
-                        'period': 'regenerate',
+                        'period': 'monthly_regenerate',
                         'timeout': int(options.regenerate_period) * 60 * 60,
                         'trigger': CronTrigger(day_of_week='sun', hour='7', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_custom_regenerate.log 2>&1"
