@@ -274,37 +274,37 @@ class Datamart(object):
                     'datamart_sync': {
                       'ttype': 'system',
                       'sql': {
-                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE customer = '{p.cgr}' AND sync_event_time BETWEEN '{p.start_time}' AND now();\""
+                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE customer = '{p.cgr}' AND sync_event_time >= '{p.start_time}';\""
                       }
                     },
                     'f_beacon_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time BETWEEN '{p.start_time}' AND now();\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time >= '{p.start_time}';\""
                       }
                     },
                     'f_cycles_detailed': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time BETWEEN '{p.start_time}' AND now();\""
+                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time >= '{p.start_time}';\""
                       }
                     },
                     'f_cycles_summarized': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time BETWEEN '{p.start_time}' AND now();\""
+                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time >= '{p.start_time}';\""
                       }
                     },
                     'f_events': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time  BETWEEN '{p.start_time}' AND now();\""
+                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time  >= '{p.start_time}';\""
                       }
                     },
                     'f_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  BETWEEN '{p.start_time}' AND now();\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  >= '{p.start_time}';\""
                       }
                     }
                 }
