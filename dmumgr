@@ -162,7 +162,9 @@ def dmtask(dm_info, job):
     job.start_time = job.end_time - dm_info.periods[job.period]
     params = AD(dm_info)
     params.job = job
-    logger.info(f'Running job with cfg: \n{params.jstr()}')
+    msg = f'Running job with cfg: \n{params.jstr()}'
+    logger.info(msg)
+    print(msg)
     mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
         logger.info(qinfo)
@@ -171,10 +173,14 @@ def dmtask(dm_info, job):
         for table in tables:
             was_run = run_query(params, qtype, table, qname)
             if not was_run:
-                return f"{job.job_id} - NOT EXECUTED."
+                msg = f"{job.job_id} - NOT EXECUTED."
+                print(msg)
+                return msg
     for projection in params.job.projections:
         run_projection(params, projection)
-    return f"{job.job_id} - Done."
+    msg = f"{job.job_id} - Done."
+    print(msg)
+    return msg
 
 class Datamart(object):
     def __init__(self, options):
