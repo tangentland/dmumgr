@@ -237,15 +237,16 @@ class Datamart(object):
                             'yom':['subjects', 'cycles']
                         },
                         'query_map': {
+                            'system': [
+                                ['delete_sync_markers', ['datamart_sync'], 'system']
+                            ],
                             'mom': [
-                                ['delete_sync_markers', ['datamart_sync'], 'system'],
                                 ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
                                 ['delete_cycles', ['f_cycles_summarized'], 'datamart'],
                                 ['delete_events', ['f_events'], 'datamart'],
                                 ['delete_intervals', ['f_intervals'], 'datamart']
                             ],
                             'yom':[
-                                ['delete_sync_markers', ['datamart_sync'], 'system'],
                                 ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
                                 ['delete_cycles', ['f_cycles_summarized'], 'datamart'],
                                 ['delete_events', ['f_events'], 'datamart'],
@@ -280,7 +281,7 @@ class Datamart(object):
                     'datamart_sync': {
                       'ttype': 'system',
                       'sql': {
-                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE customer = '{p.cgr}' AND sync_event_time >= '{p.start_time}';\""
+                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE (customer = '{p.cgr}' OR customer LIKE '{p.cgr}:%') AND sync_event_time >= '{p.start_time}';\""
                       }
                     },
                     'f_beacon_intervals': {
