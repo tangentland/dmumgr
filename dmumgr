@@ -168,7 +168,6 @@ def dmtask(dm_info, job):
     mode_cfg = dm_info.mode[job.mode]
     for qinfo in mode_cfg.query_map[job.use_case]:
         logger.info(qinfo)
-        #  ['delete_sync_markers', ['datamart_sync'], 'system'],
         qname, tables, qtype = qinfo
         for table in tables:
             was_run = run_query(params, qtype, table, qname)
@@ -237,16 +236,15 @@ class Datamart(object):
                             'yom':['subjects', 'cycles']
                         },
                         'query_map': {
-                            'system': [
-                                ['delete_sync_markers', ['datamart_sync'], 'system']
-                            ],
                             'mom': [
+                                ['delete_sync_markers', ['datamart_sync'], 'system'],
                                 ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
                                 ['delete_cycles', ['f_cycles_summarized'], 'datamart'],
                                 ['delete_events', ['f_events'], 'datamart'],
                                 ['delete_intervals', ['f_intervals'], 'datamart']
                             ],
                             'yom':[
+                                ['delete_sync_markers', ['datamart_sync'], 'system'],
                                 ['delete_cycle_steps', ['f_cycles_detailed'], 'datamart'],
                                 ['delete_cycles', ['f_cycles_summarized'], 'datamart'],
                                 ['delete_events', ['f_events'], 'datamart'],
