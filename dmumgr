@@ -581,7 +581,7 @@ class Datamart(object):
 def get_options():
     parser = argparse.ArgumentParser(description="datamart update manager")
     parser.add_argument(
-        "-b", "--branch", default="release", help="Portal branch to use for datamart projections"
+        "-b", "--branch", default="master", help="Portal branch to use for datamart projections"
     )
     parser.add_argument(
         "-c", "--cgrs", default=None, help="quoted, comma separated list of cgrs <'cgr1,cgr2'>"
