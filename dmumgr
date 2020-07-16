@@ -141,6 +141,8 @@ def dmtask(dm_info, job):
             return False
 
     def run_projection(params, projection):
+        ```cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'
+        ```
         if params.portal.sync:
             shcmd(f"cd {params.portal.path} && git pull")
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "

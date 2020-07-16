@@ -1,5 +1,5 @@
 {
-    "branch": "release",
+    "branch": "master",
     "path": "portal",
     "projections": {
         "beacons": "./lib/datamart/incremental-dataloader/etl-beacons.js",

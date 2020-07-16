@@ -1,7 +1,7 @@
 {
     "datamart_type": "aggregate",
     "cgr": "cemex",
-    "cgrs": ["cemex", "cemexcc", "cemexclayton", "cemexsierra", "cemexredwood"],
+    "cgrs": ["cemexcc"],
     "use_case": "yom",
     "database": "motion_clipper",
     "top_off": "hourly",
