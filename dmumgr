@@ -2,6 +2,7 @@
 
 from attribute_dict import *
 from shell import shcmd
+import shell
 
 import argparse
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -30,7 +31,7 @@ from threading import Thread
 import sched
 import time
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(shell.__file__)
 
 # --------------------------------------------------------------------------------------------------------------
 ### setup logging
