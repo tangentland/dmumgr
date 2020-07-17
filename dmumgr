@@ -150,7 +150,7 @@ def dmtask(dm_info, job):
         params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time}' "
         params.job.cmd += f"--stop-date='{params.job.end_time}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
+        if shcmd(f"ps ax | grep node | grep [d]atamart\-instance\=\'{params.job.cgr}\'")[2] != 0:
             logger.debug(cmd)
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
