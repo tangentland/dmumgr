@@ -570,7 +570,7 @@ class Datamart(object):
             Runner(self.cfg).run()
 
     def setup_portal(self):
-        output = shcmd(f'{CURRENT_DIR}/getgit {self.cfg.datamart.portal.path} {self.cfg.datamart.portal.branch} HEAD {self.cfg.datamart.portal.repo} none')
+        output = shcmd(f'{CURRENT_DIR}/getgit {self.cfg.datamart.portal.path} {self.cfg.datamart.portal.branch} HEAD {self.cfg.datamart.portal.repo} "npm i"')
         logger.info(output)
         print(output)
 
