@@ -569,12 +569,7 @@ class Datamart(object):
             Runner(self.cfg).run()
 
     def setup_portal(self):
-        if not os.path.exists(self.cfg.datamart.portal.path):
-            shcmd(f'git clone {self.cfg.datamart.portal.repo} {self.cfg.datamart.portal.path}')
-            shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
-        elif self.cfg.datamart.portal.sync:
-            shcmd(f'cd {self.cfg.datamart.portal.path} && git checkout {self.cfg.datamart.portal.branch}')
-            shcmd(f'cd {self.cfg.datamart.portal.path} && git pull')
+        shcmd(f'{CURRENT_DIR}/getgit {self.cfg.datamart.portal.path} {self.cfg.datamart.portal.branch} HEAD {self.cfg.datamart.portal.repo} none')
 
 
 def get_options():

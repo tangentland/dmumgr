@@ -1,0 +1,126 @@
+#!/bin/bash
+
+LOGDIR=/var/log/atollogy
+LOGFILE=getgit.log
+LOGDEST=$LOGDIR/$LOGFILE
+
+TARGET=$1
+BRANCH=$2
+COMMIT=$3
+SRC=$4
+INSTALL=$5
+
+
+function log() {
+    #echo inside of log
+    if [ ! -d $LOGDIR ]; then
+        mkdir -p $LOGDIR
+    fi;
+    if [ ! -z "${1+x}" ]; then
+       #echo positional arg being logged
+        echo [`date`]: "$1" | tee -a $LOGDEST
+    else
+        SIN=$(cat -);
+        #echo stdin being logged
+        echo [`date`]: "${SIN}" | tee -a $LOGDEST
+    fi;
+}
+
+function doInstall() {
+    if [[ $INSTALL != 'none' ]] && [[ ${#TARGET} > 0 ]]; then
+        log "Install command being called \'$INSTALL\'";
+        cd $TARGET
+        $INSTALL
+        echo SETTRUE
+    else
+        log "No install command provided";
+    fi
+}
+
+function clone() {
+    log "Cloning repo $SRC....";
+    git clone $SRC $TARGET | log;
+    if [ $? != 0 ] || [ ! -d $TARGET ]; then
+        echo "Cloning failed: Exiting"
+        exit 1
+    else
+        cd $TARGET
+    fi
+    if [[ $COMMIT != 'HEAD' ]]; then
+        git checkout $COMMIT
+    elif [[ $BRANCH != 'master' ]]; then
+        git checkout $BRANCH
+        git pull
+    fi
+    echo SETTRUE
+    doInstall
+    exit 0
+
+}
+
+msg="getgit called with $TARGET $BRANCH $COMMIT $SRC $INSTALL"
+log $msg
+echo $msg
+
+if [ -z "${SRC+x}" ]; then
+    echo "No source provided: Exiting"
+    exit 1
+fi
+
+if [ -z ${TARGET+x} ]; then
+    echo "getgit <target_dir> <branch> <commit> <git_src>"
+    exit 1
+elif [[ ${TARGET:0:1} != '/' ]]; then
+    echo "Target path must be an absolute path from root: target is \"$TARGET\" - exiting"
+    exit 1
+elif [[ ! -d $TARGET ]]; then
+    clone
+elif [[ ! -d $TARGET/.git ]]; then
+    rm -r $TARGET
+    clone
+else
+    if ! grep "$SRC" $TARGET/.git/config; then
+        sed -i "" -e "s|url = .*|url = $SRC|g" $TARGET/.git/config
+    fi
+    cd $TARGET
+    echo "Target is set to TARGET=$TARGET"
+    git reset --hard
+    git fetch
+    git fetch --tags
+fi
+
+if [[ $COMMIT != 'HEAD' ]]; then
+    if [[ ${#COMMIT} != 40 ]]; then
+        COMMIT=$(cd $TARGET && git rev-list -1 $COMMIT | awk '{print $1}')
+        echo Current ref is: ${COMMIT}
+    fi
+fi
+
+echo Commit is: ${COMMIT}
+
+CURRENT=$(cd $TARGET && git rev-parse HEAD)
+CURRENT_BRANCH=$(cd $TARGET && git branch | grep '*' | cut -d' ' -f2)
+ORIGIN_HEAD=$(cd $TARGET &&  git rev-parse origin/$BRANCH)
+
+if [[ $COMMIT != "HEAD" ]]; then
+    if [[ $CURRENT != $COMMIT ]]; then
+        log "Current hash is NOT equal to target commit. Checking out - $COMMIT"
+        git checkout $COMMIT
+        doInstall
+    else
+        log "Current hash is equal to target commit"
+    fi
+elif [[ $CURRENT_BRANCH == $BRANCH ]] && [[ $ORIGIN_HEAD != $CURRENT ]]; then
+    log "Branches are equal, but commits out of sync - pulling origin HEAD ${ORIGIN_HEAD}"
+    git pull
+    doInstall
+elif [[ $CURRENT_BRANCH != $BRANCH ]]; then
+    log "Branches are NOT equal, checking out $BRANCH"
+    git checkout $BRANCH
+    git pull
+    doInstall
+fi
+
+log Success.
+
+exit 0
