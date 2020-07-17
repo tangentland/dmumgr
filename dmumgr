@@ -141,8 +141,7 @@ def dmtask(dm_info, job):
             return False
 
     def run_projection(params, projection):
-        ```cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'
-        ```
+        """cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'"""
         if params.portal.sync:
             shcmd(f"cd {params.portal.path} && git pull")
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "
@@ -563,7 +562,7 @@ class Datamart(object):
             self.scheduler.start()
             try:
                 while True:
-                    time.sleep(2)
+                    time.sleep(5)
             except (KeyboardInterrupt, SystemExit):
                 self.scheduler.shutdown()
         else:
@@ -596,7 +595,7 @@ def get_options():
         "-l", "--log_level", default='info', help="set logging level output level [info] <critical|debug|error|fatal|warn|info>"
     )
     parser.add_argument(
-        "-o", "--override", default=None, help="override run mode [none] <top_off|daily_regenerate|weekly_regenerate>"
+        "-o", "--override", default=None, help="override run mode [none] <top_off|daily_regenerate|weekly_regenerate|monthly_regenerate>"
     )
     parser.add_argument(
         "-p", "--cfg_path", default=f'{CURRENT_DIR}/customer_cfgs',
