@@ -1,0 +1,8 @@
+{
+    "datamart_type": "pg",
+    "use_case": "yom",
+    "database": "splurge_strict",
+    "top_off": "hourly",
+    "executor": "default",
+    "projections": ["cycles"]
+}
