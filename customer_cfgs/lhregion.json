@@ -5,6 +5,6 @@
     "use_case": "yom",
     "database": "pooh_marvel",
     "top_off": "hourly",
-    "executor": "long_running",
+    "executor": "default",
     "projections": ["subjects", "cycles"]
 }
