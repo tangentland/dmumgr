@@ -270,7 +270,7 @@ class Datamart(object):
                     "hhourly": timedelta(minutes=30),
                     "qhourly": timedelta(minutes=15),
                     "daily": timedelta(days=3),
-                    "weekly": timedelta(weeks=3),
+                    "weekly": timedelta(weeks=2),
                     "hourly_regenerate": timedelta(hours=int(options.regenerate_period)),
                     "daily_regenerate": timedelta(days=int(options.regenerate_period)),
                     "weekly_regenerate": timedelta(weeks=int(options.regenerate_period)),
