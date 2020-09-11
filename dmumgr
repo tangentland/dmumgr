@@ -148,8 +148,8 @@ def dmtask(dm_info, job):
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "
         params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' "
         params.job.cmd += f"node --max-old-space-size=4096 {params.portal.projections[projection]} "
-        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time}' "
-        params.job.cmd += f"--stop-date='{params.job.end_time}' --job_id='{params.job.job_id}'"
+        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time.isoformat()}' "
+        params.job.cmd += f"--stop-date='{params.job.end_time.isoformat()}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if shcmd(f"ps ax | grep node | grep [d]atamart\-instance\=\'{params.job.cgr}\'")[2] != 0:
             logger.debug(cmd)
@@ -281,37 +281,37 @@ class Datamart(object):
                     'datamart_sync': {
                       'ttype': 'system',
                       'sql': {
-                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE (customer = '{p.cgr}' OR customer LIKE '{p.cgr}:%') AND sync_event_time >= '{p.start_time}';\""
+                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE (customer = '{p.cgr}' OR customer LIKE '{p.cgr}:%') AND sync_event_time >= '{p.start_time.isoformat()}';\""
                       }
                     },
                     'f_beacon_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time >= '{p.start_time}';\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time >= '{p.start_time.isoformat()}';\""
                       }
                     },
                     'f_cycles_detailed': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time >= '{p.start_time}';\""
+                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time >= '{p.start_time.isoformat()}';\""
                       }
                     },
                     'f_cycles_summarized': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time >= '{p.start_time}';\""
+                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time >= '{p.start_time.isoformat()}';\""
                       }
                     },
                     'f_events': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time  >= '{p.start_time}';\""
+                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time  >= '{p.start_time.isoformat()}';\""
                       }
                     },
                     'f_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  >= '{p.start_time}';\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  >= '{p.start_time.isoformat()}';\""
                       }
                     }
                 }
