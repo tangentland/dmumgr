@@ -1,0 +1,8 @@
+{
+    "datamart_type": "pg",
+    "use_case": "yom",
+    "database": "energetic_sloth",
+    "top_off": "hourly",
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
+}
