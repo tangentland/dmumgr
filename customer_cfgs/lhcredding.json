@@ -2,7 +2,7 @@
     "datamart_type": "pg",
     "use_case": "yom",
     "database": "wardrob_missile",
-    "top_off": "qhourly",
+    "top_off": "hourly",
     "executor": "default",
     "projections": ["subjects", "cycles"]
 }
