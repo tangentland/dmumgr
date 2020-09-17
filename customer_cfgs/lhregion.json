@@ -1,7 +1,7 @@
 {
     "datamart_type": "aggregate",
     "cgr": "lhregional",
-    "cgrs": ["lehighhanson", "lehighhansonflt", "lehighhansonstk", "lehighhansonteh","lhnazareth", "lhsredding", "lhunionbridge"],
+    "cgrs": ["lehighhanson", "lehighhansonflt", "lehighhansonstk", "lehighhansonteh","lhnazareth", "lhcredding", "lhunionbridge"],
     "use_case": "yom",
     "database": "pooh_marvel",
     "top_off": "hourly",
