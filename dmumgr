@@ -138,7 +138,7 @@ def dmtask(dm_info, job):
             logger.info(f'{params.job.job_id}: query {qname} query detail: "{query}"')
             return True
         else:
-            logger.info(f"{params.job.job_id}: {qname} was not executed due to an existing job running")
+            logger.info(f"{params.job.job_id}: {qname} was NOT EXECUTED due to an existing job running")
             return False
 
     def run_projection(params, projection):
@@ -158,7 +158,7 @@ def dmtask(dm_info, job):
             end = datetime.now()
             logger.info(f'{params.job.job_id}: projection {projection} execution time was {end - start}')
         else:
-            logger.info(f"{params.job.job_id}: projection {projection} was not executed due to an existing job running")
+            logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTEDdue to an existing job running")
 
     job.end_time = datetime.utcnow()
     job.start_time = job.end_time - dm_info.periods[job.period]
@@ -356,6 +356,38 @@ class Datamart(object):
                         'period': 'weekly',
                         'timeout': 179.5*60,
                         'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
+                    }
+                },
+                'hourly_regional': {
+                    'top_off': {
+                        'job_id': lambda p: f'{p.cgr}_top_off_hourly',
+                        'mode': 'top_off',
+                        'misfire_grace_time': 30*30,
+                        'period': 'hourly',
+                        'timeout': 29.5*60,
+                        'trigger': OrTrigger([
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-6,11-23', minute='30'),
+                            CronTrigger(day_of_week='sun', hour='0-6,13-23', minute='30'),
+                        ]),
+                        'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_hourly_top_off.log 2>&1"
+                    },
+                    'daily_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_daily_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 60*60,
+                        'period': 'daily',
+                        'timeout': 89*60,
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='7', minute='30'),
+                        'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_daily_regenerate.log 2>&1"
+                    },
+                    'weekly_regenerate': {
+                        'job_id': lambda p: f'{p.cgr}_weekly_regenerate',
+                        'mode': 'regenerate',
+                        'misfire_grace_time': 3*60*60,
+                        'period': 'weekly',
+                        'timeout': 179.5*60,
+                        'trigger': CronTrigger(day_of_week='sun', hour='7', minute='30'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_weekly_regenerate.log 2>&1"
                     }
                 },

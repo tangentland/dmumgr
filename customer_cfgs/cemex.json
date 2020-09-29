@@ -4,7 +4,7 @@
     "cgrs": ["cemexcc"],
     "use_case": "yom",
     "database": "motion_clipper",
-    "top_off": "hourly",
-    "executor": "long_running",
+    "top_off": "hourly_regional",
+    "executor": "default",
     "projections": ["subjects", "cycles"]
 }
