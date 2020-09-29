@@ -159,7 +159,7 @@ def dmtask(dm_info, job):
             logger.info(f'{params.job.job_id}: projection {projection} execution time was {end - start}')
             return True
         else:
-            logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTEDdue to an existing job running")
+            logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTED due to an existing job running")
             return False
 
     job.end_time = datetime.utcnow()
