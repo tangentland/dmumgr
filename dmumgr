@@ -129,7 +129,7 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f"ps ax | grep node | grep '[d]atamart\-instance\=\'{params.job.cgr}\''")[2] != 0:
+        if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
             logger.debug(cmd)
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
@@ -151,14 +151,16 @@ def dmtask(dm_info, job):
         params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time.isoformat()}' "
         params.job.cmd += f"--stop-date='{params.job.end_time.isoformat()}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f"ps ax | grep node | grep [d]atamart\-instance\=\'{params.job.cgr}\'")[2] != 0:
+        if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
             logger.debug(cmd)
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
             end = datetime.now()
             logger.info(f'{params.job.job_id}: projection {projection} execution time was {end - start}')
+            return True
         else:
             logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTEDdue to an existing job running")
+            return False
 
     job.end_time = datetime.utcnow()
     job.start_time = job.end_time - dm_info.periods[job.period]
@@ -178,7 +180,11 @@ def dmtask(dm_info, job):
                 print(msg)
                 return msg
     for projection in params.job.projections:
-        run_projection(params, projection)
+        was_run = run_projection(params, projection)
+        if not was_run:
+            msg = f"{job.job_id} - NOT EXECUTED."
+            print(msg)
+            return msg
     msg = f"{job.job_id} - Done."
     print(msg)
     return msg
