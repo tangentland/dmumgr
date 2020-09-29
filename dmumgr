@@ -220,6 +220,7 @@ class Datamart(object):
             'job_defs': {},
             'modes': {
                 'hourly': [],
+                'hourly_regional': [],
                 'hhourly': [],
                 'qhourly': []
             },
