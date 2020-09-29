@@ -4,5 +4,5 @@
     "database": "particular_contrary",
     "top_off": "hourly",
     "executor": "default",
-    "projections": ["subjects"]
+    "projections": ["subjects", "cycles"]
 }
