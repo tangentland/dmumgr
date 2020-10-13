@@ -4,5 +4,5 @@
     "database": "noheel_achilles",
     "top_off": "hourly",
     "executor": "default",
-    "projections": ["subjects"]
+    "projections": ["subjects", "cycles"]
 }
