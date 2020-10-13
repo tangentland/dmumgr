@@ -4,5 +4,5 @@
     "database": "permeable_photon",
     "top_off": "hourly",
     "executor": "default",
-    "projections": ["subjects"]
+    "projections": ["subjects", "cycles"]
 }
