@@ -550,6 +550,9 @@ class Datamart(object):
                         fh.write(ccfg.jstr())
                 if ccfg.enabled:
                     ccfg = self.cfg.datamarts[cgr] = ccfg
+                else:
+                    logger.info(f"Skipping cgr config {cgr} as its disabled")
+                    continue
                 self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.cfg.params.cgrs.append(cgr)
                 self.cfg.modes[ccfg.top_off].append(cgr)
