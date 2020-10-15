@@ -543,7 +543,13 @@ class Datamart(object):
                 self.cfg.job_defs[cgr] = AD()
                 self.jobs[cgr] = AD()
                 logger.info(f"Loading {cgr}: {fn}")
-                ccfg = self.cfg.datamarts[cgr] = AD.load(fn)
+                ccfg = AD.load(fn)
+                if 'enabled' not in ccfg:
+                    ccfg.enabled = True
+                    with open(fn, 'w') as fh:
+                        fh.write(ccfg.jstr())
+                if ccfg.enabled:
+                    ccfg = self.cfg.datamarts[cgr] = ccfg
                 self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 self.cfg.params.cgrs.append(cgr)
                 self.cfg.modes[ccfg.top_off].append(cgr)
