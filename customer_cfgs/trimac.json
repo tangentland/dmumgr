@@ -1,8 +1,12 @@
 {
-    "datamart_type": "pg",
-    "use_case": "yom",
     "database": "carriage_activate",
-    "top_off": "qhourly",
+    "datamart_type": "pg",
+    "enabled": true,
     "executor": "default",
-    "projections": ["subjects", "cycles"]
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "qhourly",
+    "use_case": "yom"
 }

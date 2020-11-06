@@ -1,8 +1,12 @@
 {
-    "datamart_type": "pg",
-    "use_case": "yom",
     "database": "drive_fuller",
-    "top_off": "hourly_regional",
+    "datamart_type": "pg",
+    "enabled": true,
     "executor": "default",
-    "projections": ["subjects", "cycles"]
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly_regional",
+    "use_case": "yom"
 }

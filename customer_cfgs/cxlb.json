@@ -1,8 +1,12 @@
 {
-    "datamart_type": "pg",
-    "use_case": "yom",
     "database": "unenthusiastic_ant",
-    "top_off": "hourly",
+    "datamart_type": "pg",
+    "enabled": true,
     "executor": "default",
-    "projections": ["subjects", "cycles"]
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly",
+    "use_case": "yom"
 }

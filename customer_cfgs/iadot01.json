@@ -1,5 +1,5 @@
 {
-    "database": "restraint_spell",
+    "database": "prosecution_elect",
     "datamart_type": "pg",
     "enabled": true,
     "executor": "default",
@@ -7,6 +7,6 @@
         "subjects",
         "cycles"
     ],
-    "top_off": "qhourly",
+    "top_off": "hourly",
     "use_case": "yom"
 }
