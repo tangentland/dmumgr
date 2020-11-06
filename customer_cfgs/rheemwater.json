@@ -1,9 +1,12 @@
 {
-    "enabled": false,
-    "datamart_type": "pg",
-    "use_case": "mom",
     "database": "noheel_achilles",
-    "top_off": "hourly",
+    "datamart_type": "pg",
+    "enabled": false,
     "executor": "default",
-    "projections": ["subjects", "cycles"]
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly",
+    "use_case": "mom"
 }
