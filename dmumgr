@@ -516,7 +516,8 @@ class Datamart(object):
         })
 
         self.cfg.datamart.portal.path = options.portal_path
-
+        if options.cgrs:
+            self.cfg.params.cgrs = options.cgrs.split(',')
         # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
             # add_job (
             #     func,
@@ -548,7 +549,9 @@ class Datamart(object):
                     ccfg.enabled = True
                     with open(fn, 'w') as fh:
                         fh.write(ccfg.jstr())
-                if ccfg.enabled:
+                if (ccfg.enabled or
+                    (options.override and options.group == ccfg.use_case) or
+                    (options.override and options.cgrs and cgr in options.cgrs.split(','))):
                     ccfg = self.cfg.datamarts[cgr] = ccfg
                 else:
                     logger.info(f"Skipping cgr config {cgr} as its disabled")
@@ -593,9 +596,7 @@ class Datamart(object):
 
         if options.override:
             self.cfg.params.daemon = False
-            if options.cgrs:
-                self.cfg.params.cgrs = options.cgrs.split(',')
-            elif options.group:
+            if options.group:
                 self.cfg.params.cgrs = sorted(self.cfg.dm_groups[options.group])[::-1]
             else:
                 self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
