@@ -553,7 +553,7 @@ class Datamart(object):
                         fh.write(ccfg.jstr())
                 if (ccfg.enabled or
                     (options.override and options.group == ccfg.use_case) or
-                    (options.override and options.cgrs and cgr in options.cgrs.split(','))):
+                    (options.override and cgr in self.cfg.params.cgrs)):
                     ccfg = self.cfg.datamarts[cgr] = ccfg
                 else:
                     logger.info(f"Skipping cgr config {cgr} as its disabled")
