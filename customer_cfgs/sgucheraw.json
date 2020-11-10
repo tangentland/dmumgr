@@ -1,5 +1,5 @@
 {
-    "enabled": false,
+    "enabled": true,
     "datamart_type": "pg",
     "use_case": "mom",
     "database": "particular_contrary",
