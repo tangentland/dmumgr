@@ -147,7 +147,7 @@ def dmtask(dm_info, job):
             shcmd(f"cd {params.portal.path} && git pull")
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "
         params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' "
-        params.job.cmd += f"node --max-old-space-size=4096 {params.portal.projections[projection]} "
+        params.job.cmd += f"node --max-old-space-size=8192 {params.portal.projections[projection]} "
         params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time.isoformat()}' "
         params.job.cmd += f"--stop-date='{params.job.end_time.isoformat()}' --job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
@@ -660,7 +660,7 @@ def get_options():
         help="disable git pull of portal repo before executing projections [false]"
     )
     parser.add_argument(
-        "-w", "--workers", default=8, help="number of worker threads"
+        "-w", "--workers", default=4, help="number of worker threads"
     )
     parser.add_argument("-H", "--HELP", help="Display extended help documentation")
     options = parser.parse_args()
