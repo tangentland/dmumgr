@@ -1,7 +1,7 @@
 {
     "database": "permeable_photon",
     "datamart_type": "pg",
-    "enabled": false,
+    "enabled": true,
     "executor": "default",
     "projections": [
         "subjects",
