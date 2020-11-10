@@ -148,8 +148,8 @@ def dmtask(dm_info, job):
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "
         params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' "
         params.job.cmd += f"node --max-old-space-size=8192 {params.portal.projections[projection]} "
-        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start-date='{params.job.start_time.isoformat()}' "
-        params.job.cmd += f"--stop-date='{params.job.end_time.isoformat()}' --job_id='{params.job.job_id}'"
+        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start_date='{params.job.start_time.isoformat()}' "
+        params.job.cmd += f"--job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
             logger.debug(cmd)
