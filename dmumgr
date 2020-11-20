@@ -148,7 +148,7 @@ def dmtask(dm_info, job):
         params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start_date='{params.job.start_time.isoformat()}' "
         params.job.cmd += f"--job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
+        if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] > 0:
             logger.debug(cmd)
             start = datetime.now()
             logger.info(shcmd(cmd, timeout=job.timeout))
@@ -162,7 +162,7 @@ def dmtask(dm_info, job):
     params = AD(dm_info)
     params.job = job
 
-    if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
+    if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] > 0:
         msg = f"{job.job_id} - NOT EXECUTED DUE TO EXISTING JOB."
         print(msg)
         return msg
