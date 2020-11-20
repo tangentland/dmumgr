@@ -549,7 +549,7 @@ class Datamart(object):
                 if options.mode == 'cgrs' and cgr in options.cgrs:
                     self.cfg.params.cgrs.append(cgr)
                     self.cfg.datamarts[cgr] = ccfg
-                elif options.mode == 'use_case' and ccfg.use_case == options.group and ccfg.enabled:
+                elif options.mode == 'use_case' and ccfg.enabled and options.group == 'all' or ccfg.use_case == options.group:
                     self.cfg.params.cgrs.append(cgr)
                     self.cfg.datamarts[cgr] = ccfg
                     self.cfg.dm_groups[ccfg.use_case].append(cgr)
@@ -633,7 +633,7 @@ def get_options():
         "-d", "--debug", default=False, action="store_true", help="run with debug null sleep command"
     )
     parser.add_argument(
-        "-g", "--group", default=None, help="group to use in override run mode [none] <mom|yom>"
+        "-g", "--group", default=None, help="group to use in override run mode [none] <mom|yom|all>"
     )
     parser.add_argument(
         "-l", "--log_level", default='info', help="set logging level output level [info] <critical|debug|error|fatal|warn|info>"
