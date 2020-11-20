@@ -1,0 +1,12 @@
+{
+    "database": "shiny_grass",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly",
+    "use_case": "yom"
+}

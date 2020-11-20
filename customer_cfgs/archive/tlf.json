@@ -1,0 +1,17 @@
+{
+    "cgrsForCycles": [
+        {
+            "cgr": "tlf",
+            "facilities": [
+                "Yuma",
+                "True Leaf"
+            ]
+        }
+    ],
+    "targetTables": {
+        "coalescedEvents": "NONE"
+    },
+    "connInfo": {
+        "database": "mountain_scooner"
+    }
+}

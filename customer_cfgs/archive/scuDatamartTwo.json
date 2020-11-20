@@ -1,0 +1,8 @@
+{
+    "targetTables": {
+        "coalescedEvents": "NONE"
+    },
+    "connInfo": {
+        "database": "datamart"
+    }
+}

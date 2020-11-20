@@ -1,0 +1,12 @@
+{
+    "database": "iron_bulldog",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly",
+    "use_case": "mom"
+}

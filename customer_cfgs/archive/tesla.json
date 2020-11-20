@@ -1,0 +1,19 @@
+{
+    "datamart_type": "pg",
+    "use_case": "mom",
+    "connInfo": {
+        "database": "bulldog_fin"
+    },
+    "schedule": {
+        "top_off": "hourly"
+    },
+    "top_off": {
+        "beacons": false,
+        "cycles": false,
+        "regenerate": true,
+        "subjects": true
+    },
+    "targetTables": {
+        "coalescedEvents": "f_intervals"
+    }
+}
