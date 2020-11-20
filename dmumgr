@@ -551,10 +551,12 @@ class Datamart(object):
                     ccfg.enabled = True
                     with open(fn, 'w') as fh:
                         fh.write(ccfg.jstr())
-                if (ccfg.enabled or
-                    (options.override and options.group == ccfg.use_case) or
-                    (options.override and cgr in self.cfg.params.cgrs)):
-                    ccfg = self.cfg.datamarts[cgr] = ccfg
+                if options.mode == 'cgrs' and cgr in options.cgrs:
+                    self.cfg.datamarts[cgr] = ccfg
+                elif options.mode == 'use_case' and ccfg.use_case == options.group and ccfg.enabled:
+                    self.cfg.datamarts[cgr] = ccfg
+                elif options.mode == 'std' and ccfg.enabled:
+                    self.cfg.datamarts[cgr] = ccfg
                 else:
                     logger.info(f"Skipping cgr config {cgr} as its disabled")
                     continue
@@ -666,6 +668,22 @@ def get_options():
     )
     parser.add_argument("-H", "--HELP", help="Display extended help documentation")
     options = parser.parse_args()
+    if options.cgrs is not None:
+        options.cgrs  = options.cgrs.split(',')
+        options.group = None
+        options.mode = 'cgrs'
+        if not len(options.cgrs):
+            print(f"CGRs list is zero length - exiting....")
+            sys.exit(1)
+    elif options.group is not None:
+        if options.group in ['mom', 'yom']:
+            options.cgr = None
+            options.mode = 'use_case'
+        else:
+            print(f"Group must be either 'mom' or 'yom' - exiting....")
+            sys.exit(1)
+    else:
+        options.mode = 'std'
     return options
 
 #--------------------------------------------------------------------------------------------------------------
