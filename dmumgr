@@ -129,17 +129,13 @@ def dmtask(dm_info, job):
         })
         params.job.cmd = query_bases[qtype]
         cmd = params.job.cmd_string(params.job)
-        if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
-            logger.debug(cmd)
-            start = datetime.now()
-            logger.info(shcmd(cmd, timeout=job.timeout))
-            end = datetime.now()
-            logger.info(f'{params.job.job_id}: query {qname} execution time was {end - start}')
-            logger.info(f'{params.job.job_id}: query {qname} query detail: "{query}"')
-            return True
-        else:
-            logger.info(f"{params.job.job_id}: {qname} was NOT EXECUTED due to an existing job running")
-            return False
+        logger.debug(cmd)
+        start = datetime.now()
+        logger.info(shcmd(cmd, timeout=job.timeout))
+        end = datetime.now()
+        logger.info(f'{params.job.job_id}: query {qname} execution time was {end - start}')
+        logger.info(f'{params.job.job_id}: query {qname} query detail: "{query}"')
+        return True
 
     def run_projection(params, projection):
         """cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'"""
@@ -162,6 +158,10 @@ def dmtask(dm_info, job):
             logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTED due to an existing job running")
             return False
 
+    if shcmd(f'''ps ax | grep node | grep "[i]nstance.*{params.job.cgr}[' ]"''')[2] != 0:
+        msg = f"{job.job_id} - NOT EXECUTED DUE TO EXISTING JOB."
+        print(msg)
+        return msg
     job.end_time = datetime.utcnow()
     job.start_time = job.end_time - dm_info.periods[job.period]
     params = AD(dm_info)
@@ -175,10 +175,6 @@ def dmtask(dm_info, job):
         qname, tables, qtype = qinfo
         for table in tables:
             was_run = run_query(params, qtype, table, qname)
-            if not was_run:
-                msg = f"{job.job_id} - NOT EXECUTED."
-                print(msg)
-                return msg
     for projection in params.job.projections:
         was_run = run_projection(params, projection)
         if not was_run:
@@ -598,10 +594,7 @@ class Datamart(object):
 
         if options.override:
             self.cfg.params.daemon = False
-            if options.group:
-                self.cfg.params.cgrs = sorted(self.cfg.dm_groups[options.group])[::-1]
-            else:
-                self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
+            self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
         else:
             logger.info(self.scheduler.print_jobs())
 
