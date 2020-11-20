@@ -512,7 +512,7 @@ class Datamart(object):
         })
 
         self.cfg.datamart.portal.path = options.portal_path
-        self.cfg.params.cgrs = options.cgrs if options.cgrs is not None else []
+        self.cfg.params.cgrs = []
 
         # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
             # add_job (
@@ -546,56 +546,59 @@ class Datamart(object):
                     with open(fn, 'w') as fh:
                         fh.write(ccfg.jstr())
                 if options.mode == 'cgrs' and cgr in options.cgrs:
+                    self.cfg.params.cgrs.append(cgr)
                     self.cfg.datamarts[cgr] = ccfg
                 elif options.mode == 'use_case' and ccfg.use_case == options.group and ccfg.enabled:
+                    self.cfg.params.cgrs.append(cgr)
                     self.cfg.datamarts[cgr] = ccfg
+                    self.cfg.dm_groups[ccfg.use_case].append(cgr)
                 elif options.mode == 'std' and ccfg.enabled:
+                    self.cfg.params.cgrs.append(cgr)
                     self.cfg.datamarts[cgr] = ccfg
+                    self.cfg.modes[ccfg.top_off].append(cgr)
+                    for job_type, job_tmpl in self.cfg.schedules[ccfg.top_off].items():
+                        job = AD(job_tmpl)
+                        job.update(ccfg)
+                        job.cgr = cgr
+                        job.job_id = job.job_id(job)
+                        self.cfg.job_defs[cgr][job_type] = job
+                        if self.cfg.params.debug:
+                            self.jobs[cgr][job.job_id] = self.scheduler.add_job(
+                                os.system,
+                                job.trigger,
+                                args=[f'echo {job.job_id}:$(date)  >> /var/log/atollogy/dmumgr/{job.cgr}_debug.log'],
+                                executor='default',
+                                id=job.job_id,
+                                name=job.job_id,
+                                misfire_grace_time=60,
+                                coalesce=True,
+                                max_instances=1,
+                                replace_existing=True
+                            )
+                        else:
+                            self.jobs[cgr][job.job_id] = self.scheduler.add_job(
+                                dmtask,
+                                job.trigger,
+                                args=[
+                                    self.cfg.datamart,
+                                    job
+                                ],
+                                executor=job.executor,
+                                id=job.job_id,
+                                name=job.job_id,
+                                misfire_grace_time=job.misfire_grace_time,
+                                max_instances=1,
+                                replace_existing=True
+                            )
                 else:
                     logger.info(f"Skipping cgr config {cgr} as its disabled")
                     continue
-                self.cfg.dm_groups[ccfg.use_case].append(cgr)
-                self.cfg.params.cgrs.append(cgr)
-                self.cfg.modes[ccfg.top_off].append(cgr)
-                for job_type, job_tmpl in self.cfg.schedules[ccfg.top_off].items():
-                    job = AD(job_tmpl)
-                    job.update(ccfg)
-                    job.cgr = cgr
-                    job.job_id = job.job_id(job)
-                    self.cfg.job_defs[cgr][job_type] = job
-                    if self.cfg.params.debug:
-                        self.jobs[cgr][job.job_id] = self.scheduler.add_job(
-                            os.system,
-                            job.trigger,
-                            args=[f'echo {job.job_id}:$(date)  >> /var/log/atollogy/dmumgr/{job.cgr}_debug.log'],
-                            executor='default',
-                            id=job.job_id,
-                            name=job.job_id,
-                            misfire_grace_time=60,
-                            coalesce=True,
-                            max_instances=1,
-                            replace_existing=True
-                        )
-                    else:
-                        self.jobs[cgr][job.job_id] = self.scheduler.add_job(
-                            dmtask,
-                            job.trigger,
-                            args=[
-                                self.cfg.datamart,
-                                job
-                            ],
-                            executor=job.executor,
-                            id=job.job_id,
-                            name=job.job_id,
-                            misfire_grace_time=job.misfire_grace_time,
-                            max_instances=1,
-                            replace_existing=True
-                        )
 
-        if options.override:
+        self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)
+        if options.mode in ['cgrs', 'use_use']:
             self.cfg.params.daemon = False
-            self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)[::-1]
         else:
+            self.cfg.params.daemon = True
             logger.info(self.scheduler.print_jobs())
 
     def event_listener(self, event):
@@ -616,7 +619,6 @@ class Datamart(object):
     def setup_portal(self):
         output = shcmd(f'{CURRENT_DIR}/getgit {self.cfg.datamart.portal.path} {self.cfg.datamart.portal.branch} HEAD {self.cfg.datamart.portal.repo} "/usr/bin/npm install --production --unsafe-perm --no-audit"')
         logger.info(output)
-        print(output)
 
 
 def get_options():
