@@ -106,6 +106,7 @@ class Runner(object):
     def run(self):
         with GracefulInterruptHandler(funcs=[self.pool.shutdown]) as GIH:
             for cgr in self.cfg.params.cgrs:
+                print(f"Loading job for: {cgr}")
                 job = AD(self.cfg.schedules.override[self.cfg.params.override])
                 job.update(self.cfg.datamarts[cgr])
                 job.cgr = cgr
