@@ -1,8 +1,0 @@
-{
-    "datamart_type": "pg",
-    "use_case": "mom",
-    "database": "unity_thoughtful",
-    "top_off": "hourly",
-    "executor": "default",
-    "projections": ["subjects"]
-}

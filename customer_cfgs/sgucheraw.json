@@ -1,9 +1,0 @@
-{
-    "enabled": true,
-    "datamart_type": "pg",
-    "use_case": "mom",
-    "database": "particular_contrary",
-    "top_off": "hourly",
-    "executor": "default",
-    "projections": ["subjects", "cycles"]
-}

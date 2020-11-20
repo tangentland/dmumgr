@@ -1,8 +1,0 @@
-{
-    "connInfo": {
-        "database": "gregarious_amoeba"
-    },
-    "targetTables": {
-        "coalescedEvents": "f_intervals"
-    }
-}

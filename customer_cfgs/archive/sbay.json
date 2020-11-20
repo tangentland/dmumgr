@@ -1,8 +1,0 @@
-{
-    "datamart_type": "pg",
-    "use_case": "mom",
-    "database": "canyon_sailboat",
-    "top_off": "hourly",
-    "executor": "default",
-    "projections": ["subjects"]
-}
