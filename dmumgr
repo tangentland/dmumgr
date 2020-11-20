@@ -596,7 +596,7 @@ class Datamart(object):
                     continue
 
         self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)
-        if  self.cfg.params.mode in ['cgrs', 'use_use']:
+        if self.cfg.params.mode in ['cgrs', 'use_case']:
             self.cfg.params.daemon = False
         else:
             logger.info(self.scheduler.print_jobs())
