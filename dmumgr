@@ -159,32 +159,35 @@ def dmtask(dm_info, job):
             logger.info(f"{params.job.job_id}: projection {projection} was NOT EXECUTED due to an existing job running")
             return False
 
+    params = AD(dm_info)
+    params.job = job
+
+
     if int(shcmd(f'''ps ax | grep node | grep -c "[i]nstance.*{params.job.cgr}[' ]"''')[0][0]) == 0:
         msg = f"{job.job_id} - NOT EXECUTED DUE TO EXISTING JOB."
         print(msg)
         return msg
-    job.end_time = datetime.utcnow()
-    job.start_time = job.end_time - dm_info.periods[job.period]
-    params = AD(dm_info)
-    params.job = job
-    msg = f'Running job with cfg: \n{params.jstr()}'
-    logger.info(msg)
-    print(msg)
-    mode_cfg = dm_info.mode[job.mode]
-    for qinfo in mode_cfg.query_map[job.use_case]:
-        logger.info(qinfo)
-        qname, tables, qtype = qinfo
-        for table in tables:
-            was_run = run_query(params, qtype, table, qname)
-    for projection in params.job.projections:
-        was_run = run_projection(params, projection)
-        if not was_run:
-            msg = f"{job.job_id} - NOT EXECUTED."
-            print(msg)
-            return msg
-    msg = f"{job.job_id} - Done."
-    print(msg)
-    return msg
+    else:
+        msg = f'Running job with cfg: \n{params.jstr()}'
+        logger.info(msg)
+        print(msg)
+        job.end_time = datetime.utcnow()
+        job.start_time = job.end_time - dm_info.periods[job.period]
+        mode_cfg = dm_info.mode[job.mode]
+        for qinfo in mode_cfg.query_map[job.use_case]:
+            logger.info(qinfo)
+            qname, tables, qtype = qinfo
+            for table in tables:
+                was_run = run_query(params, qtype, table, qname)
+        for projection in params.job.projections:
+            was_run = run_projection(params, projection)
+            if not was_run:
+                msg = f"{job.job_id} - NOT EXECUTED."
+                print(msg)
+                return msg
+        msg = f"{job.job_id} - Done."
+        print(msg)
+        return msg
 
 class Datamart(object):
     def __init__(self, options):
