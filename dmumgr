@@ -325,6 +325,7 @@ class Datamart(object):
                 'cgrs': [],
                 'daemon': True,
                 'debug': options.debug,
+                'mode': options.mode,
                 'override': options.override,
                 'portal_path': options.portal_path,
                 'regenerate_period': int(options.regenerate_period),
@@ -512,9 +513,6 @@ class Datamart(object):
             }
         })
 
-        self.cfg.datamart.portal.path = options.portal_path
-        self.cfg.params.cgrs = []
-
         # scheduler.add_job signature: https://www.kite.com/python/docs/apscheduler.schedulers.background.BackgroundScheduler.add_job
             # add_job (
             #     func,
@@ -596,10 +594,9 @@ class Datamart(object):
                     continue
 
         self.cfg.params.cgrs = sorted(self.cfg.params.cgrs)
-        if options.mode in ['cgrs', 'use_use']:
+        if  self.cfg.params.mode in ['cgrs', 'use_use']:
             self.cfg.params.daemon = False
         else:
-            self.cfg.params.daemon = True
             logger.info(self.scheduler.print_jobs())
 
     def event_listener(self, event):
