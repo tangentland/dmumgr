@@ -675,10 +675,12 @@ def get_options():
         if not len(options.cgrs):
             print(f"CGRs list is zero length - exiting....")
             sys.exit(1)
+        print(f"Using cgr mode for: {options.cgrs}")
     elif options.group is not None:
         if options.group in ['mom', 'yom']:
             options.cgr = None
             options.mode = 'use_case'
+            print(f"Using use_case mode: {options.group}")
         else:
             print(f"Group must be either 'mom' or 'yom' - exiting....")
             sys.exit(1)
