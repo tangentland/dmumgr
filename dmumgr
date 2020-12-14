@@ -139,13 +139,13 @@ def dmtask(dm_info, job):
         return True
 
     def run_projection(params, projection):
-        """example: cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'"""
+        """example: cd ./portal && NODE_ENV=prd BCM_ENV_NAME=prd USE_REPORT_CACHE=false DEBUG='portal*,-portal:metrics' nice node --max-old-space-size=4096 ./lib/datamart/incremental-dataloader/index.js --datamart-instance='cemex'"""
         if params.portal.sync:
             shcmd(f"cd {params.portal.path} && git pull")
         params.job.cmd = f"cd {params.portal.path} && NODE_ENV=prd BCM_ENV_NAME=prd "
         params.job.cmd += f"USE_REPORT_CACHE=false DEBUG='portal*,-portal:instr*,-portal:db-query,-portal:metrics:*' "
-        params.job.cmd += f"node --max-old-space-size=8192 {params.portal.projections[projection]} "
-        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start_date='{params.job.start_time.isoformat().split('T')[0]}' "
+        params.job.cmd += f"nice node --max-old-space-size=8192 {params.portal.projections[projection]} "
+        params.job.cmd += f"--datamart-instance='{params.job.cgr}' --start_date='{params.job.start_time.isoformat()}' --stop_date='{params.job.stop_time.isoformat()}' "
         params.job.cmd += f"--job_id='{params.job.job_id}'"
         cmd = params.job.cmd_string(params.job)
         if f'={params.job.cgr} ' not in str(shcmd('ps ax | grep node')[0]):
@@ -206,7 +206,7 @@ class Datamart(object):
                 'apscheduler.daemon': 'true',
                 'apscheduler.job_defaults.coalesce': 'true',
                 'apscheduler.job_defaults.max_instances': '1',
-                'apscheduler.timezone': timezone('US/Eastern')
+                'apscheduler.timezone': timezone('US/Pacific')
             }
         )
 
@@ -287,37 +287,37 @@ class Datamart(object):
                     'datamart_sync': {
                       'ttype': 'system',
                       'sql': {
-                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE (customer = '{p.cgr}' OR customer LIKE '{p.cgr}:%') AND sync_event_time >= '{p.start_time.isoformat()}';\""
+                        'delete_sync_markers': lambda p: f"\"DELETE FROM datamart_sync WHERE (customer = '{p.cgr}' OR customer LIKE '{p.cgr}:%') AND sync_event_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     },
                     'f_beacon_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time >= '{p.start_time.isoformat()}';\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_beacon_intervals WHERE f_collection_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     },
                     'f_cycles_detailed': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time >= '{p.start_time.isoformat()}';\""
+                        'delete_cycle_steps': lambda p: f"\"DELETE FROM f_cycles_detailed WHERE start_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     },
                     'f_cycles_summarized': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time >= '{p.start_time.isoformat()}';\""
+                        'delete_cycles': lambda p: f"\"DELETE FROM f_cycles_summarized WHERE start_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     },
                     'f_events': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time  >= '{p.start_time.isoformat()}';\""
+                        'delete_events': lambda p: f"\"DELETE FROM f_events WHERE f_collection_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     },
                     'f_intervals': {
                       'ttype': 'datamart',
                       'sql': {
-                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time  >= '{p.start_time.isoformat()}';\""
+                        'delete_intervals': lambda p: f"\"DELETE FROM f_intervals WHERE measure_start_time between '{str(p.start_time)}' and '{str(p.stop_time)}';\""
                       }
                     }
                 }
@@ -661,6 +661,10 @@ def get_options():
     )
     parser.add_argument("-H", "--HELP", help="Display extended help documentation")
     options = parser.parse_args()
+
+    if options.override:
+        options.workers = 2
+
     if options.cgrs is not None:
         options.cgrs  = options.cgrs.split(',')
         options.group = None
