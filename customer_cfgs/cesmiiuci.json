@@ -1,0 +1,11 @@
+{
+    "database": "plesenton_brooks",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "subjects"
+    ],
+    "top_off": "hourly",
+    "use_case": "mom"
+}
