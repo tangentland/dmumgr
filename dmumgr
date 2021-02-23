@@ -660,7 +660,7 @@ def get_options():
         help="start date for regeneration '2021/01/21'"
     )
     parser.add_argument(
-        None, "--sync_portal_disable", default=False, action="store_true",
+        "--sync_portal_disable", default=False, action="store_true",
         help="disable git pull of portal repo before executing projections [false]"
     )
     parser.add_argument(
