@@ -342,8 +342,8 @@ class Datamart(object):
                         'period': 'hourly',
                         'timeout': 29.5*60,
                         'trigger': OrTrigger([
-                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-7,12-23', minute='0'),
-                            CronTrigger(day_of_week='sun', hour='0-7,14-23', minute='0'),
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-12,16-23', minute='0'),
+                            CronTrigger(day_of_week='sun', hour='0-12,16-23', minute='0'),
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_top_off.log 2>&1"
                     },
@@ -353,7 +353,7 @@ class Datamart(object):
                         'misfire_grace_time': 90*60,
                         'period': 'daily',
                         'timeout': 89*60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'weekly_regenerate': {
@@ -362,7 +362,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'timeout': 179.5*60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     }
                 },
@@ -374,8 +374,8 @@ class Datamart(object):
                         'period': 'hourly',
                         'timeout': 29.5*60,
                         'trigger': OrTrigger([
-                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-6,11-23', minute='30'),
-                            CronTrigger(day_of_week='sun', hour='0-6,13-23', minute='30'),
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-12,16-23', minute='30'),
+                            CronTrigger(day_of_week='sun', hour='0-12,16-23', minute='30'),
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_top_off.log 2>&1"
                     },
@@ -385,7 +385,7 @@ class Datamart(object):
                         'misfire_grace_time': 60*60,
                         'period': 'daily',
                         'timeout': 89*60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='7', minute='30'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='30'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'weekly_regenerate': {
@@ -394,7 +394,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'timeout': 179.5*60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='7', minute='30'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='30'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     }
                 },
@@ -406,8 +406,8 @@ class Datamart(object):
                         'period': 'hhourly',
                         'timeout': 14.5*60,
                         'trigger': OrTrigger([
-                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-7,12-23', minute='0,30'),
-                            CronTrigger(day_of_week='sun', hour='0-7,14-23', minute='0,30')
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-12,16-23', minute='0,30'),
+                            CronTrigger(day_of_week='sun', hour='0-12,16-23', minute='0,30')
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_top_off.log 2>&1"
                     },
@@ -417,7 +417,7 @@ class Datamart(object):
                         'misfire_grace_time': 60*60,
                         'period': 'daily',
                         'timeout': 89*60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'weekly_regenerate': {
@@ -426,7 +426,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'timeout': 179.5*60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     }
                 },
@@ -438,8 +438,8 @@ class Datamart(object):
                         'period': 'qhourly',
                         'timeout': 7.5*60,
                         'trigger': OrTrigger([
-                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-7,14-23', minute='0,15,30,45'),
-                            CronTrigger(day_of_week='sun', hour='0-7,14-23', minute='0,15,30,45'),
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-12,16-23', minute='0,15,30,45'),
+                            CronTrigger(day_of_week='sun', hour='0-12,16-23', minute='0,15,30,45'),
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_top_off.log 2>&1"
                     },
@@ -449,7 +449,7 @@ class Datamart(object):
                         'misfire_grace_time': 60*60,
                         'period': 'daily',
                         'timeout': 89*60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'weekly_regenerate': {
@@ -458,7 +458,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly',
                         'timeout': 179.5*60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     }
                 },
@@ -470,8 +470,8 @@ class Datamart(object):
                         'period': 'hourly',
                         'timeout': 29.5*60,
                         'trigger': OrTrigger([
-                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-7,14-23', minute='0'),
-                            CronTrigger(day_of_week='sun', hour='0-7,14-23', minute='0'),
+                            CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='0-12,16-23', minute='0'),
+                            CronTrigger(day_of_week='sun', hour='0-12,16-23', minute='0'),
                         ]),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_top_off.log 2>&1"
                     },
@@ -481,7 +481,7 @@ class Datamart(object):
                         'misfire_grace_time': 90*60,
                         'period': 'hourly_regenerate',
                         'timeout': int(options.regenerate_period) * 5 * 60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'daily_regenerate': {
@@ -490,7 +490,7 @@ class Datamart(object):
                         'misfire_grace_time': 90*60,
                         'period': 'daily_regenerate',
                         'timeout': int(options.regenerate_period) * 15 * 60,
-                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='mon,tue,wed,thu,fri,sat', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'weekly_regenerate': {
@@ -499,7 +499,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'weekly_regenerate',
                         'timeout': int(options.regenerate_period) * 30 * 60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                     'monthly_regenerate': {
@@ -508,7 +508,7 @@ class Datamart(object):
                         'misfire_grace_time': 3*60*60,
                         'period': 'monthly_regenerate',
                         'timeout': int(options.regenerate_period) * 60 * 60,
-                        'trigger': CronTrigger(day_of_week='sun', hour='8', minute='0'),
+                        'trigger': CronTrigger(day_of_week='sun', hour='13', minute='0'),
                         'cmd_string': lambda p: f"{p.cmd} >> /var/log/atollogy/dmumgr/{p.cgr}_regenerate.log 2>&1"
                     },
                 }
@@ -642,6 +642,9 @@ def get_options():
         "-o", "--override", default=None, help="override run mode [none] <top_off|daily_regenerate|weekly_regenerate|monthly_regenerate>"
     )
     parser.add_argument(
+        "-e", "--end_date", default=datetime.utcnow(), help="specify regenerate period end_date '2021/01/21' instead of using period increments"
+    )
+    parser.add_argument(
         "-p", "--cfg_path", default=f'{CURRENT_DIR}/customer_cfgs',
         help="Path for datamart cfgs: <./customer_cfgs>"
     )
@@ -653,7 +656,11 @@ def get_options():
         "-r", "--regenerate_period", default=0, help="regenerate period in weeks"
     )
     parser.add_argument(
-        "-s", "--sync_portal_disable", default=False, action="store_true",
+        "-s", "--start_date", default=None,
+        help="start date for regeneration '2021/01/21'"
+    )
+    parser.add_argument(
+        None, "--sync_portal_disable", default=False, action="store_true",
         help="disable git pull of portal repo before executing projections [false]"
     )
     parser.add_argument(
@@ -661,6 +668,12 @@ def get_options():
     )
     parser.add_argument("-H", "--HELP", help="Display extended help documentation")
     options = parser.parse_args()
+
+    if not isinstance(options.start_date, datetime) and isinstance(options.start_date, str):
+        options.start_date = datetime.strptime(options.start_date, "%Y/%m/%d")
+
+    if not isinstance(options.end_date, datetime) and isinstance(options.end_date, str):
+        options.end_date = datetime.strptime(options.end_date, "%Y/%m/%d")
 
     if options.override:
         options.workers = 2
