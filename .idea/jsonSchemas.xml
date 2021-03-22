@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="Frontaid">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="Frontaid" />
+              <option name="relativePathToSchema" value="https://raw.githubusercontent.com/frontaid/schema/master/frontaid-schema.json" />
+              <option name="schemaVersion" value="JSON Schema version 7" />
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
