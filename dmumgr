@@ -170,10 +170,10 @@ def dmtask(dm_info, job):
         msg = f'Running job with cfg: \n{params.jstr()}'
         logger.info(msg)
         print(msg)
-        job.end_date = datetime.utcnow()
-        job.start_date = job.end_date - dm_info.periods[job.period]
-        mode_cfg = dm_info.mode[job.mode]
-        for qinfo in mode_cfg.query_map[job.use_case]:
+        params.job.end_date = datetime.utcnow()
+        params.job.start_date =  params.job.end_date - dm_info.periods[params.job.period]
+        mode_cfg = dm_info.mode[params.job.mode]
+        for qinfo in mode_cfg.query_map[params.job.use_case]:
             logger.info(qinfo)
             qname, tables, qtype = qinfo
             for table in tables:
