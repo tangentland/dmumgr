@@ -1,0 +1,12 @@
+{
+    "database": "supplementary_conference",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "subjects",
+        "cycles"
+    ],
+    "top_off": "hourly_regional",
+    "use_case": "yom"
+}

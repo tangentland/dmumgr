@@ -1,0 +1,11 @@
+{
+    "database": "profession_laboratory",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "subjects"
+    ],
+    "top_off": "hourly_regional",
+    "use_case": "yom"
+}
