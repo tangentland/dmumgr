@@ -1,0 +1,11 @@
+{
+    "database": "unimaginable_pillow",
+    "datamart_type": "pg",
+    "enabled": true,
+    "executor": "default",
+    "projections": [
+        "cycles"
+    ],
+    "top_off": "hourly_regional",
+    "use_case": "yom"
+}
