@@ -1,0 +1,9 @@
+{
+    "enabled": true,
+    "datamart_type": "pg",
+    "use_case": "mom",
+    "database": "locality_clogging",
+    "top_off": "hourly",
+    "executor": "default",
+    "projections": ["subjects", "cycle"]
+}
