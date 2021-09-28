@@ -5,5 +5,5 @@
     "database": "spelling_tungsten",
     "top_off": "hourly",
     "executor": "default",
-    "projections": ["subjects", "cycle"]
+    "projections": ["subjects", "cycles"]
 }
