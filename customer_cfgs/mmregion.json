@@ -1,8 +1,10 @@
 {
     "cgr": "mmregional",
     "cgrs": [
-        "mmagarwood",
-        "mmcmidlothian"
+        "lehighhansonstk",
+        "lehighhansonteh",
+        "lhlunioncity",
+        "lhcredding"
     ],
     "database": "imperial_galactica",
     "datamart_type": "aggregate",
