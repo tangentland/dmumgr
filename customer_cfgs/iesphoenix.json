@@ -4,8 +4,7 @@
     "enabled": true,
     "executor": "default",
     "projections": [
-        "subjects",
-        "cycles"
+        "subjects"
     ],
     "top_off": "hourly",
     "use_case": "mom"
