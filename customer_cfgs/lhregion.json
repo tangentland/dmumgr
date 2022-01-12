@@ -1,13 +1,9 @@
 {
     "cgr": "lhregional",
     "cgrs": [
-        "lehighhanson",
         "lehighhansonflt",
-        "lehighhansonstk",
-        "lehighhansonteh",
         "lhnazareth",
-        "lhcredding",
-        "lhunionbridge"
+        "lehighhanson"
     ],
     "database": "pooh_marvel",
     "datamart_type": "aggregate",
