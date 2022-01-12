@@ -6,6 +6,6 @@
     "projections": [
         "subjects"
     ],
-    "top_off": "hourly",
+    "top_off": "daily",
     "use_case": "mom"
 }

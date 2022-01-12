@@ -3,7 +3,7 @@
     "datamart_type": "pg",
     "use_case": "mom",
     "database": "clockwork_boarding",
-    "top_off": "hourly",
+    "top_off": "daily",
     "executor": "default",
     "projections": ["subjects"]
 }

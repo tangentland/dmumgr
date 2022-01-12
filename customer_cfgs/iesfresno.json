@@ -6,6 +6,6 @@
     "projections": [
         "subjects"
     ],
-    "top_off": "hourly_regional",
+    "top_off": "daily",
     "use_case": "yom"
 }

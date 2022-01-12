@@ -3,7 +3,7 @@
     "datamart_type": "pg",
     "use_case": "mom",
     "database": "particular_contrary",
-    "top_off": "hourly",
+    "top_off": "daily",
     "executor": "default",
     "projections": ["subjects", "cycles"]
 }
