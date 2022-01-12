@@ -224,6 +224,7 @@ class Datamart(object):
             },
             'job_defs': {},
             'modes': {
+                'daily': [],
                 'hourly': [],
                 'hourly_regional': [],
                 'hhourly': [],
@@ -276,7 +277,7 @@ class Datamart(object):
                     "hhourly": timedelta(minutes=30),
                     "qhourly": timedelta(minutes=15),
                     "4hours": timedelta(hours=4),
-                    "daily": timedelta(days=32),
+                    "daily": timedelta(days=2),
                     "weekly": timedelta(weeks=1),
                     "hourly_regenerate": timedelta(hours=int(options.regenerate_period)),
                     "daily_regenerate": timedelta(days=int(options.regenerate_period)),
