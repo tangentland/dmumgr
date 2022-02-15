@@ -233,7 +233,7 @@ class Datamart(object):
             'datamart': {
                 'conn_info': {
                     'user': 'atollogy',
-                    'host': 'analytics.ccbxi26o2tim.us-west-2.rds.amazonaws.com',
+                    'host': 'analytics-cluster.cluster-chq2xi4sedxw.us-west-2.rds.amazonaws.com',
                     'password': 'BobCrapKnowsNothing470',
                     'port': 5432,
                     'database': 'datamart'
