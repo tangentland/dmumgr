@@ -6,6 +6,6 @@
         "cycles": "./lib/datamart/incremental-dataloader/etl-cycles.js",
         "subjects": "./lib/datamart/incremental-dataloader/index.js"
     },
-    "repo": "git@bitbucket.org:atollogy/portal.git",
+    "repo": "git@bitbucket.org:at0l/portal.git",
     "sync": true
 }
