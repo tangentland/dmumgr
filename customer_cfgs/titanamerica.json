@@ -1,8 +1,12 @@
 {
     "datamart_type": "pg",
     "use_case": "yom",
+    "enabled": true,
     "database": "commence_gown",
     "top_off": "daily",
     "executor": "default",
-    "projections": ["subjects", "cycles"]
+    "projections": [
+        "subjects",
+        "cycles"
+    ]
 }
