@@ -1,0 +1,9 @@
+{
+    "enabled": true,
+    "datamart_type": "pg",
+    "use_case": "mom",
+    "database": "bellpepper_availability",
+    "top_off": "daily",
+    "executor": "default",
+    "projections": ["subjects", "cycles"]
+}
