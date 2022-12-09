@@ -3,7 +3,7 @@
     "use_case": "yom",
     "enabled": true,
     "database": "commence_gown",
-    "top_off": "daily",
+    "top_off": "qhourly",
     "executor": "default",
     "projections": [
         "subjects",
